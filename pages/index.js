@@ -44,21 +44,19 @@ async function handleAnalyze(e) {
       <h1>🪶 Матриця долі — AI версія</h1>
       <p>Введи дату народження у форматі <b>ДД.ММ.РРРР</b> і натисни «Розшифрувати».</p>
 
-      <form onSubmit={handleAnalyze} style={{display:"flex", gap:12, alignItems:"center"}}>
-        <input
-          value={dob}
-          onChange={e=>setDob(e.target.value)}
-          placeholder="наприклад 13.10.1987"
-          inputMode="numeric"
-          style={{flex:1, minWidth:260, padding:12, fontSize:16, border:"1px solid #ccc", borderRadius:8}}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{padding:"12px 18px", fontSize:16, border:"none", borderRadius:8, background:"#FFC700"}}
-        >
-          {loading ? "Обробка…" : "Розшифрувати"}
-        </button>
+     <form onSubmit={handleAnalyze} style={{display:"flex", gap:12, alignItems:"center"}}>
+  <input
+    id="dob"             // ← додай id або name
+    name="dob"
+    value={dob}
+    onChange={e => setDob(e.target.value)}
+    placeholder="наприклад 13.10.1987"
+    inputMode="numeric"
+    style={{flex:1, minWidth:260, padding:12, fontSize:16, border:"1px solid #ccc", borderRadius:8}}
+  />
+  <button type="submit" disabled={loading} style={{padding:"12px 18px", fontSize:16, border:"none", borderRadius:8, background:"#FFC700"}}>
+    {loading ? "Обробка…" : "Розшифрувати"}
+  </button>
       </form>
 
       {err && <p style={{color:"#b00020", marginTop:16}}>Помилка: {err}</p>}
