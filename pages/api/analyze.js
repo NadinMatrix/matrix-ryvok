@@ -1,36 +1,27 @@
 // pages/api/analyze.js
 import OpenAI from "openai";
 
-const openai = new OpenAI({
+const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { date } = req.body;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "Ти — експерт з нумерології та матриці долі. Відповідай українською мовою.",
-        },
-        {
-          role: "user",
-          content: `Проаналізуй дату народження ${date} і зроби коротку розшифровку.`,
-        },
-      ],
+    const completion = await client.responses.create({
+      model: "gpt-5",
+      input: `Зроби коротку духовно-нумерологічну розшифровку для дати народження ${date}. 
+      Опиши ключову енергію, талант і призначення цієї душі у 3-4 реченнях.`,
     });
 
-    const result = completion.choices[0].message.content;
-    res.status(200).json({ result });
+    res.status(200).json({ result: completion.output_text });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Помилка при запиті до OpenAI API" });
+    console.error("Помилка:", error);
+    res.status(500).json({ error: "Помилка при зверненні до OpenAI API" });
   }
 }
