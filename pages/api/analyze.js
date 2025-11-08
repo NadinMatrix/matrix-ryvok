@@ -1,30 +1,43 @@
 // pages/api/analyze.js
-// pages/api/analyze.js
 import OpenAI from "openai";
+
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
     const { dob } = req.body || {};
-    if (!dob) return res.status(400).json({ error: "Missing dob" });
+    if (!dob) return res.status(400).json({ ok: false, error: "Missing dob" });
 
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const messages = [
+      { role: "system", content: "Ти експерт з нумерології RYVOK. Відповідай українською, коротко й по суті." },
+      { role: "user", content: `Зроби стислу розшифровку матриці долі для дати ${dob}.
+Дай 4 блоки:
+• Значення
+• Енергія
+• Практика
+• Афірмація
+Без містики й залякувань, підтримуючий тон, 5–8 речень загалом.` }
+    ];
 
-    const completion = await client.responses.create({
-      model: "gpt-5-mini",
-      input: `Зроби коротку, дружню українську розшифровку матриці долі для дати ${dob}. Дай 5–7 маркерів: головні енергії, сильні сторони, виклики, порада на рік.`,
+    // Використовуємо перевірену кінцеву точку chat.completions
+    const r = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages,
+      temperature: 0.7,
     });
 
-    const text =
-      completion.output_text ||
-      completion.output?.[0]?.content?.[0]?.text ||
-      "Не вдалося розпарсити відповідь моделі.";
+    const text = r.choices?.[0]?.message?.content?.trim() || "";
+    if (!text) throw new Error("Empty AI response");
 
-    return res.status(200).json({ text });
-  } catch (err) {
-    return res.status(500).json({ error: String(err) });
+    return res.status(200).json({ ok: true, text });
+  } catch (e) {
+    console.error("ANALYZE_API_ERROR:", e);
+    return res.status(500).json({ ok: false, error: e.message || "Server error" });
+  }
+}
   }
 }
