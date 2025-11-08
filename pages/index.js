@@ -1,29 +1,69 @@
-// уривок із pages/index.js
-async function handleAnalyze() {
-  const dob = document.getElementById("dob").value.trim();
-  const btn = document.getElementById("go");
-  const out = document.getElementById("out");
+// pages/index.js
+import { useState } from "react";
 
-  if (!dob) {
-    out.textContent = "Введи дату у форматі ДД.ММ.РРРР";
-    return;
+export default function Home() {
+  const [dob, setDob] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [out, setOut] = useState("");
+  const [err, setErr] = useState("");
+
+  async function handleAnalyze(e) {
+    e?.preventDefault?.();
+    setErr("");
+    setOut("");
+
+    const v = dob.trim();
+    if (!v) {
+      setErr("Введи дату у форматі ДД.ММ.РРРР");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dob: v }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Помилка запиту");
+      setOut(data.text);
+    } catch (e) {
+      setErr(e.message || "Невідома помилка");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  btn.disabled = true;
-  out.textContent = "Генерую розшифровку...";
+  return (
+    <main style={{maxWidth: 720, margin: "60px auto", padding: 16, fontFamily: "system-ui"}}>
+      <h1>🪶 Матриця долі — AI версія</h1>
+      <p>Введи дату народження у форматі <b>ДД.ММ.РРРР</b> і натисни «Розшифрувати».</p>
 
-  try {
-    const resp = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dob }),
-    });
+      <form onSubmit={handleAnalyze} style={{display:"flex", gap:12, alignItems:"center"}}>
+        <input
+          value={dob}
+          onChange={e=>setDob(e.target.value)}
+          placeholder="наприклад 13.10.1987"
+          inputMode="numeric"
+          style={{flex:1, minWidth:260, padding:12, fontSize:16, border:"1px solid #ccc", borderRadius:8}}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          style={{padding:"12px 18px", fontSize:16, border:"none", borderRadius:8, background:"#FFC700"}}
+        >
+          {loading ? "Обробка…" : "Розшифрувати"}
+        </button>
+      </form>
 
-    const data = await resp.json();
-    out.textContent = data.text || `Помилка: ${data.error || "невідома"}`;
-  } catch (e) {
-    out.textContent = `Мережна помилка: ${e}`;
-  } finally {
-    btn.disabled = false;
-  }
+      {err && <p style={{color:"#b00020", marginTop:16}}>Помилка: {err}</p>}
+      {out && (
+        <div style={{marginTop:24, padding:16, border:"1px solid #eee", borderRadius:12, background:"#fff"}}>
+          <h3>Результат</h3>
+          <div style={{whiteSpace:"pre-wrap", lineHeight:1.6}}>{out}</div>
+        </div>
+      )}
+    </main>
+  );
 }
