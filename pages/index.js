@@ -7,32 +7,36 @@ export default function Home() {
   const [out, setOut] = useState("");
   const [err, setErr] = useState("");
 
-  async function handleAnalyze(e) {
-    e?.preventDefault?.();
-    setErr("");
-    setOut("");
+async function handleAnalyze(e) {
+  e.preventDefault();                 // ← важливо!
+  setErr("");
+  setOut("");
+  const v = dob?.trim();
 
-    const v = dob.trim();
-    if (!v) {
-      setErr("Введи дату у форматі ДД.ММ.РРРР");
-      return;
-    }
+  if (!/^\d{2}\.\d{2}\.\d{4}$/.test(v)) {
+    setErr("Введи дату у форматі ДД.MM.РРРР");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dob: v }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Помилка запиту");
-      setOut(data.text);
-    } catch (e) {
-      setErr(e.message || "Невідома помилка");
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const res = await fetch("/api/analyze", {   // ← правильний endpoint
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dob: v }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data?.text) {
+      throw new Error(data?.error || "Помилка запиту");
     }
+    setOut(data.text);
+  } catch (e) {
+    setErr(e.message || "Невідома помилка");
+  } finally {
+    setLoading(false);
+  }
+}
   }
 
   return (
