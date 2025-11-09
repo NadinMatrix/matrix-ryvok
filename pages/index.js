@@ -1,36 +1,31 @@
 // pages/index.js
-import React from "react";
+import { useState } from "react";
 
 export default function Home() {
-  const [dob, setDob] = React.useState("");
-  const [out, setOut] = React.useState("");
-  const [err, setErr] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
+  const [dob, setDob] = useState("");
+  const [out, setOut] = useState("");
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleAnalyze(e) {
-    e.preventDefault();
-    setErr("");
-    setOut("");
+    e.preventDefault();               // важливо!
+    setErr(""); setOut("");
     const v = dob?.trim();
 
-    // валідація формату ДД.ММ.РРРР
     if (!/^\d{2}\.\d{2}\.\d{4}$/.test(v)) {
-      setErr("Введи дату у форматі ДД.ММ.РРРР");
+      setErr("Введи дату у форматі ДД.MM.ПPPP");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch("/api/matrix", {          // ← або "/api/analyze" якщо хочеш
+      const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dob: v }),
+        body: JSON.stringify({ dob: v })
       });
-
       const data = await res.json();
-      if (!res.ok || !data?.text) {
-        throw new Error(data?.error || "Помилка запиту");
-      }
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "Помилка запиту");
       setOut(data.text);
     } catch (e) {
       setErr(e.message || "Невідома помилка");
@@ -41,24 +36,20 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: 720, margin: "60px auto", padding: 16, fontFamily: "system-ui" }}>
-      <h1>🔮 Матриця долі — AI версія</h1>
-      <p>Введи дату народження у форматі <b>ДД.ММ.РРРР</b> і натисни «Розшифрувати».</p>
+      <h1>🪶 Матриця долі — AI версія</h1>
+      <p>Введи дату народження у форматі <b>ДД.MM.ПPPP</b> і натисни «Розшифрувати».</p>
 
       <form onSubmit={handleAnalyze} style={{ display: "flex", gap: 12, alignItems: "center" }}>
         <input
-          id="dob" name="dob"
-          value={dob}
+          id="dob" name="dob" value={dob}
           onChange={(e) => setDob(e.target.value)}
           placeholder="наприклад 13.10.1987"
           inputMode="numeric"
           style={{ flex: 1, minWidth: 260, padding: 12, fontSize: 16, border: "1px solid #ccc", borderRadius: 8 }}
         />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: "12px 18px", fontSize: 16, border: "none", borderRadius: 8, background: "#FFC700" }}
-        >
-          {loading ? "Обробка..." : "Розшифрувати"}
+        <button type="submit" disabled={loading}
+          style={{ padding: "12px 18px", fontSize: 16, border: "none", borderRadius: 8, background: "#FFC700" }}>
+          {loading ? "Обробка…" : "Розшифрувати"}
         </button>
       </form>
 
