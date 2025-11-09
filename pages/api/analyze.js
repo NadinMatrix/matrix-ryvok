@@ -10,34 +10,31 @@ export default async function handler(req, res) {
 
   try {
     const { dob } = req.body || {};
-    if (!dob) return res.status(400).json({ ok: false, error: "Missing dob" });
+    if (!dob) {
+      return res.status(400).json({ ok: false, error: "Дата відсутня" });
+    }
 
-    const messages = [
-      { role: "system", content: "Ти експерт з нумерології RYVOK. Відповідай українською, коротко й по суті." },
-      { role: "user", content: `Зроби стислу розшифровку матриці долі для дати ${dob}.
+    const prompt = `Зроби стислу розшифровку матриці долі для дати народження ${dob}.
 Дай 4 блоки:
 • Значення
 • Енергія
 • Практика
 • Афірмація
-Без містики й залякувань, підтримуючий тон, 5–8 речень загалом.` }
-    ];
+Пиши українською, без зайвої містики.`;
 
-    // Використовуємо перевірену кінцеву точку chat.completions
-    const r = await client.chat.completions.create({
+    const resp = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      messages,
+      messages: [
+        { role: "system", content: "Ти експерт з нумерології, пишеш стисло й практично."},
+        { role: "user", content: prompt }
+      ],
       temperature: 0.7,
+      max_tokens: 500
     });
 
-    const text = r.choices?.[0]?.message?.content?.trim() || "";
-    if (!text) throw new Error("Empty AI response");
-
+    const text = resp.choices?.[0]?.message?.content?.trim() || "Немає відповіді";
     return res.status(200).json({ ok: true, text });
   } catch (e) {
-    console.error("ANALYZE_API_ERROR:", e);
-    return res.status(500).json({ ok: false, error: e.message || "Server error" });
-  }
-}
+    return res.status(500).json({ ok: false, error: e.message || "Помилка сервера" });
   }
 }
