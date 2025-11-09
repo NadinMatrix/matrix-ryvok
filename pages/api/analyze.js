@@ -3,21 +3,44 @@ import OpenAI from "openai";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-function countEnergies(dob) {
-  // Рахуємо частоти цифр 1..9 у даті (ДД.ММ.РРРР) — простий старт для "кола енергій"
-  const digits = dob.replace(/\D/g, "").split("").map(Number);
-  const counts = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
-  for (const d of digits) if (d>=1 && d<=9) counts[d]++;
-  return counts; // {1:n,2:n,...,9:n}
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+  try {
+    const { dob } = req.body || {};
+    if (!dob) {
+      return res.status(400).json({ error: "Вкажи дату народження у форматі ДД.ММ.ПППП" });
+    }
+
+    const sys = `Ти експерт-нумеролог. Відповідай українською. Формат відповіді — чотири блоки:
+### Значення
+(2–3 речення про ключові числа дати)
+
+### Енергія
+(1–2 речення про загальний вектор)
+
+### Практика
+(3 короткі прикладні поради у вигляді зв’язного тексту)
+
+### Афірмація
+(1 речення від першої особи)`;
+
+    const usr = `Дата народження: ${dob}. Зроби стислу розшифровку у 4 блоках, як у форматі вище.`;
+
+    const r = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: sys },
+        { role: "user", content: usr }
+      ],
+      temperature: 0.7
+    });
+
+    const text = r.choices?.[0]?.message?.content?.trim() || "Не вдалося згенерувати відповідь.";
+    return res.status(200).json({ ok: true, text });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: e.message || "Помилка сервера" });
+  }
 }
-
-function chakrasFromCounts(counts){
-  // Дуже проста базова модель (MVP). Потім підженемо під твою методику.
-  // Для кожної чакри даємо 3 показники: фізика / енергія / емоції (0-22)
-  // Мапінг зроблений так, щоб були "живі" числа і різниця між полями.
-  const pick = (...ks)=>ks.reduce((s,k)=>s+(counts[k]||0),0);
-
-  return [
-    { name:"Сахасрара • місія",      phys:  pick(7,8),   en: pick(1,7),   emo: pick(5)   *2+1 },
-    { name:"Аджна • доля/егрегори",  phys:  pick(2,7),   en: pick(8),     emo: pick(3,6) *2   },
-    { name:"Вішудха • оцінка мин.",  phys:  pick(5,1),   en: pick(1,
