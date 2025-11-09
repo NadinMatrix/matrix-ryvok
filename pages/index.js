@@ -1,4 +1,3 @@
-// pages/index.js
 import { useState } from "react";
 
 export default function Home() {
@@ -8,8 +7,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   async function handleAnalyze(e) {
-    e.preventDefault();               // важливо!
-    setErr(""); setOut("");
+    e.preventDefault();
+    setErr("");
+    setOut("");
     const v = dob?.trim();
 
     if (!/^\d{2}\.\d{2}\.\d{4}$/.test(v)) {
