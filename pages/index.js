@@ -25,7 +25,7 @@ export default function Home() {
 
     // валідація DD.MM.YYYY
     if (!/^\d{2}\.\d{2}\.\d{4}$/.test(v)) {
-      setErr("Введи дату у форматі ДД.ММ.ПППП");
+      setErr("Введи дату у форматі ДД.ММ.РРРР");
       return;
     }
 
