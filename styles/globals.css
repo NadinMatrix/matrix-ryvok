@@ -1,0 +1,42 @@
+:root{
+  --bg:#031827;
+  --gold:#E1CB92;
+  --text:#F5F5F5;
+  --accent:#18C3CB;
+  --line:rgba(225,203,146,0.45);
+}
+
+*{box-sizing:border-box}
+html,body{padding:0;margin:0;background:var(--bg);color:var(--text)}
+body{font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+
+a{color:inherit;text-decoration:none}
+button{cursor:pointer}
+input,button{font-family:inherit}
+
+/* Кнопка у стилі MATRIX */
+.mx-btn{
+  height:42px; min-width:210px; border-radius:12px; border:none;
+  background: var(--gold); color:#1B1B1B; font-weight:700;
+  box-shadow:0 6px 24px rgba(225,203,146,.25);
+  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.mx-btn:disabled{opacity:.6;cursor:not-allowed}
+.mx-btn:hover{transform:translateY(-1px); box-shadow:0 10px 30px rgba(225,203,146,.32)}
+
+/* Панель, таблиця, легкі бордери */
+.mx-panel{ background: rgba(255,255,255,.04); border:1px solid var(--line); border-radius:14px; }
+.mx-table{ width:100%; border-collapse:collapse; border:1px solid var(--line); }
+.mx-table th, .mx-table td{ padding:8px 10px; text-align:center; border-top:1px solid var(--line); }
+.mx-table thead th{ text-align:left }
+
+/* Анімація промальовування ліній у SVG */
+@keyframes line-draw{
+  from { stroke-dashoffset: 420; opacity:.0 }
+  to   { stroke-dashoffset: 0;   opacity:1 }
+}
+.mx-stroke{
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: line-draw 1.4s ease forwards;
+}
