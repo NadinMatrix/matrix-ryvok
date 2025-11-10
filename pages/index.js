@@ -99,7 +99,7 @@ export default function Home() {
             <h2 style={{marginTop:0}}>Твоя Матриця</h2>
 
             <div style={styles.gridWrap}>
-              <ChakraWeb svgSize={520} data={out.chakras}/>
+              <ChakraWeb svgSize={520} data={out.chakras} core={out.summary.coreEnergy} />
               <div style={{minWidth:280}}>
                 <div style={styles.card}>
                   <div style={styles.kv}>
