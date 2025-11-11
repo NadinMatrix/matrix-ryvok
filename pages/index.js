@@ -198,10 +198,12 @@ export default function Home() {
             </div>
           </section>
         )}
+          <div className="matrix-wrap">
           <ChakraWeb
   core={out?.core}
   chakras={out?.chakras || []}
 />
+  </div>
       </main>
     </div>
   );
