@@ -157,12 +157,12 @@ export default function Home() {
     </pre>
   </div>
       )}
-          <div className="matrix-wrap">
-          <ChakraWeb
-  core={out?.core}
-  chakras={out?.chakras || []}
-/>
-  </div>
+          <div style={styles.webWrap}>
+  <ChakraWeb
+    svgSize={520}
+    data={out?.chakras || []}
+  />
+</div>
       </main>
     </div>
   );
