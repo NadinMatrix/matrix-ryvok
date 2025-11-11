@@ -39,4 +39,6 @@ input,button{font-family:inherit}
   stroke-dasharray: 420;
   stroke-dashoffset: 420;
   animation: line-draw 1.4s ease forwards;
+  .matrix-wrap { display:flex; justify-content:center; }
+.matrix-wrap svg { width:100%; max-width:720px; height:auto; }
 }
