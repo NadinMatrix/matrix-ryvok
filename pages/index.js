@@ -130,7 +130,6 @@ export default function Home() {
       {out.text}
     </pre>
   </div>
-)}
         {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
 
                   </tbody>
