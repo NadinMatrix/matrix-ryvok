@@ -112,13 +112,11 @@ export default function Home() {
     ))}
   </tbody>
 </table>
- {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
-            {/* CTA на повну PDF */}
-            <div style={{marginTop:24, textAlign:'center'}}>
-              <a href="#buy" style={styles.cta}>Отримати повну PDF-розшифровку</a>
-            </div>
-          </section>
-        )}
+ {err && <div style={{color: COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
+
+<div style={{marginTop: 24, textAlign: 'center'}}>
+  <a href="#buy" style={styles.cta}>Отримати повний PDF</a>
+</div>
 {/* Результат від API */}
           {out?.text && (
   <div
