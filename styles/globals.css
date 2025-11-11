@@ -42,3 +42,7 @@ input,button{font-family:inherit}
   .matrix-wrap { display:flex; justify-content:center; }
 .matrix-wrap svg { width:100%; max-width:720px; height:auto; }
 }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
