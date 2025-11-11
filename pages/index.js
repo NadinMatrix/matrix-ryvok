@@ -284,26 +284,33 @@ function ChakraWeb({ svgSize=520, data=[] }){
 }
 
 const styles = {
-  form: {
-    display:'grid',
-    gap:16,
-    gridTemplateColumns:'1.1fr 0.9fr 1fr auto',
-    alignItems:'end',
-    background: COLORS.panel,
-    padding:'16px',
-    borderRadius:12,
-    border:`1px solid ${COLORS.line}`
+    form: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 16,
+    alignItems: 'flex-end',
+    padding: '0 8px',
   },
-  field:{ display:'flex', flexDirection:'column' },
-  label:{ fontSize:12, opacity:0.85, marginBottom:6 },
-  input:{
-    height:42, borderRadius:10, border:`1px solid ${COLORS.line}`,
-    background:'rgba(255,255,255,0.06)', color: COLORS.text, padding:'0 12px', outline:'none'
+  field: { flex: '1 1 260px', minWidth: 240 },
+  label: { display: 'block', marginBottom: 6, opacity: .85 },
+  input: {
+    width: '100%',
+    padding: '14px 16px',
+    borderRadius: 12,
+    border: `1px solid ${COLORS.gold}55`,
+    background: 'transparent',
+    color: COLORS.text,
   },
-  btn:{
-    height:42, minWidth:210, borderRadius:12, border:'none',
-    background: COLORS.gold, color:'#1B1B1B', fontWeight:700, cursor:'pointer',
-    boxShadow:'0 6px 24px rgba(225,203,146,0.25)'
+  radiosRow: { display: 'flex', alignItems: 'center', gap: 14, paddingTop: 8 },
+  btn: {
+    flex: '0 0 auto',
+    padding: '14px 22px',
+    borderRadius: 14,
+    border: 'none',
+    background: COLORS.gold,
+    color: '#031827',
+    boxShadow: '0 0 22px rgba(225,203,146,.25)',
+    cursor: 'pointer',
   },
   panel:{
     marginTop:24, padding:20, borderRadius:14, background: COLORS.panel,
