@@ -133,42 +133,15 @@ export default function Home() {
 )}
         {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
 
-        {/* Результат */}
-        {out && (
-          <section style={styles.panel}>
-            <h2 style={{marginTop:0}}>Твоя Матриця</h2>
-
-            <div style={styles.gridWrap}>
-              <ChakraWeb svgSize={520} data={out.chakras} core={out.summary.coreEnergy} />
-              <div style={{minWidth:280}}>
-                <div style={styles.card}>
-                  <div style={styles.kv}>
-                    <span style={{opacity:0.8}}>Головна енергія</span>
-                    <b style={styles.big}>{out.summary.coreEnergy}</b>
-                  </div>
-                  <div style={styles.kv}>
-                    <span style={{opacity:0.8}}>Число імені</span>
-                    <b style={styles.big}>{out.summary.nameNumber}</b>
-                  </div>
-                  <p style={{marginTop:8, lineHeight:1.6}}>{out.summary.text}</p>
-                </div>
-
-                <table style={styles.table}>
-                  <thead>
-                    <tr>
-                      <th style={{textAlign:'left'}}>Чакра</th>
-                      <th>Фізика</th><th>Енергія</th><th>Емоції</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {out.chakras.map((c,i)=>(
-                      <tr key={i}>
-                        <td>{c.name}</td>
-                        <td>{c.physical}</td>
-                        <td>{c.energy}</td>
-                        <td>{c.emotion}</td>
-                      </tr>
-                    ))}
+        {/* Результат від API */}
+{out?.text && (
+  <div style={styles.card}>
+    <div style={styles.big}>Результат</div>
+    <pre style={{whiteSpace:'pre-wrap', lineHeight:1.6, marginTop:12}}>
+      {out.text}
+    </pre>
+  </div>
+)}
                   </tbody>
                 </table>
               </div>
