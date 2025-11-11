@@ -1,5 +1,4 @@
 // pages/index.js
-import { useEffect, useMemo, useState } from 'react';
 
 const COLORS = {
   bg: '#031827',         // темний індіго
@@ -325,6 +324,19 @@ const styles = {
     margin: '10px 4px 0',
     textAlign: 'center',
   },
+    table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: 24,
+  },
+  cta: {
+    display: 'inline-block',
+    padding: '12px 20px',
+    borderRadius: 12,
+    border: `1px solid ${COLORS.gold}`,
+    color: COLORS.gold,
+    textDecoration: 'none',
+  },
 };
 
 // Адаптив
@@ -334,5 +346,4 @@ styles['@media'] = `
     .form { grid-template-columns: 1fr; }
     .btn { width:100%; }
   }
-`
-}
+`;
