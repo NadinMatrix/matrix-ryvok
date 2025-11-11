@@ -226,15 +226,28 @@ function ChakraWeb({ svgSize=520, data=[] }){
 }
 
 const styles = {
-    form: {
+  form: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: 16,
     alignItems: 'flex-end',
+    justifyContent: 'center',
     padding: '0 8px',
   },
-  field: { flex: '1 1 260px', minWidth: 240 },
-  label: { display: 'block', marginBottom: 6, opacity: .85 },
+
+  field: {
+    flex: '1 1 260px',
+    minWidth: 240,
+  },
+
+  label: {
+    display: 'block',
+    marginBottom: 6,
+    fontSize: 12,
+    opacity: 0.85,
+    color: 'rgba(255,255,255,0.85)',
+  },
+
   input: {
     width: '100%',
     padding: '14px 16px',
@@ -242,35 +255,58 @@ const styles = {
     border: `1px solid ${COLORS.gold}55`,
     background: 'transparent',
     color: COLORS.text,
+    fontSize: 16,
   },
-  radiosRow: { display: 'flex', alignItems: 'center', gap: 14, paddingTop: 8 },
+
+  radiosRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 10,
+    justifyContent: 'center',
+  },
+
   btn: {
     flex: '0 0 auto',
-    padding: '14px 22px',
+    padding: '14px 28px',
     borderRadius: 14,
     border: 'none',
     background: COLORS.gold,
     color: '#031827',
-    boxShadow: '0 0 22px rgba(225,203,146,.25)',
+    fontWeight: 600,
+    fontSize: 15,
+    boxShadow: '0 0 22px rgba(225,203,146,0.25)',
     cursor: 'pointer',
+    transition: 'all 0.25s ease',
   },
-  panel:{
-    marginTop:24, padding:20, borderRadius:14, background: COLORS.panel,
-    border:`1px solid ${COLORS.line}`
+
+  panel: {
+    marginTop: 24,
+    padding: 20,
+    borderRadius: 14,
+    border: `1px solid ${COLORS.line}`,
+    background: 'rgba(255,255,255,0.03)',
   },
-  gridWrap:{
-    display:'grid', gridTemplateColumns:'minmax(280px, 1fr) 1fr', gap:20, alignItems:'start'
+
+  gridWrap: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(280px, 1fr)',
+    justifyItems: 'center',
+    gap: 24,
   },
-  card:{
-    border:`1px solid ${COLORS.line}`, borderRadius:12, padding:14, marginBottom:14,
-    background:'rgba(255,255,255,0.03)'
+
+  card: {
+    border: `1px solid ${COLORS.line}`,
+    borderRadius: 12,
+    padding: 16,
+    background: 'rgba(255,255,255,0.03)',
   },
-  kv:{ display:'flex', alignItems:'baseline', justifyContent:'space-between' },
-  big:{ fontSize:24, color: COLORS.gold },
-  table:{
-    width:'100%', borderCollapse:'collapse', marginTop:6,
-    border:`1px solid ${COLORS.line}`
-  }
+
+  error: {
+    color: COLORS.error,
+    margin: '10px 4px 0',
+    textAlign: 'center',
+  },
 };
 
 // Адаптив
