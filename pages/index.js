@@ -320,4 +320,5 @@ styles['@media'] = `
     .form { grid-template-columns: 1fr; }
     .btn { width:100%; }
   }
-`;
+`
+}
