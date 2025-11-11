@@ -90,10 +90,28 @@ export default function Home() {
             {loading ? 'Обробка…' : 'Розшифрувати матрицю'}
           </button>
         </form>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+           
+{/* Таблиця */}
+<table style={styles.table}>
+  <thead>
+    <tr>
+      <th>Чакра</th>
+      <th>Фізика</th>
+      <th>Енергія</th>
+      <th>Емоції</th>
+    </tr>
+  </thead>
+  <tbody>
+    {out?.chakras?.map((c, i) => (
+      <tr key={i}>
+        <td>{c.name}</td>
+        <td>{c.physical}</td>
+        <td>{c.energy}</td>
+        <td>{c.emotion}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
  {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
             {/* CTA на повну PDF */}
             <div style={{marginTop:24, textAlign:'center'}}>
