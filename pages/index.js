@@ -10,64 +10,6 @@ const COLORS = {
   panel: 'rgba(255,255,255,0.04)',
   line: 'rgba(225,203,146,0.45)',
 };
-function ChakraWeb({ svgSize=520, data=[], core=0 }){
-  const size = svgSize;
-  const rOuter = size*0.40;
-  const cx = size/2, cy = size/2;
-
-  const points = React.useMemo(()=>{
-    const arr=[];
-    for(let i=0;i<7;i++){
-      const a = -Math.PI/2 + i*(2*Math.PI/7);
-      arr.push({
-        x: cx + rOuter*Math.cos(a),
-        y: cy + rOuter*Math.sin(a)
-      });
-    }
-    return arr;
-  },[size]);
-
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
-         style={{
-           background: 'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.04), transparent 65%)',
-           borderRadius: 16, border: '1px solid var(--line)'
-         }}>
-      {[0.18,0.30,0.42].map((k,i)=>(
-        <circle key={i} cx={cx} cy={cy} r={size*k/2}
-                fill="none" stroke="var(--line)" strokeDasharray="4 6"
-                className="mx-stroke" style={{animationDelay:`${0.15*i}s`}}/>
-      ))}
-      {points.map((p,i)=>(
-        <line key={i}
-          x1={p.x} y1={p.y}
-          x2={points[(i+1)%points.length].x}
-          y2={points[(i+1)%points.length].y}
-          stroke="var(--line)" strokeWidth="1"
-          className="mx-stroke" style={{animationDelay:`${0.2+0.05*i}s`}}/>
-      ))}
-      <circle cx={cx} cy={cy} r={34} fill="rgba(225,203,146,0.10)" stroke="var(--line)" className="mx-stroke" style={{animationDelay:'.35s'}}/>
-      <text x={cx} y={cy-18} textAnchor="middle" fill="var(--gold)" fontSize="12" style={{opacity:0.85}}>
-        Енергія ядра
-      </text>
-      <text x={cx} y={cy+8} textAnchor="middle" fill="var(--gold)" fontWeight={700} fontSize="24">
-        {core || ''}
-      </text>
-      {points.map((p,i)=>(
-        <g key={i}>
-          <circle cx={p.x} cy={p.y} r={10} fill="var(--gold)" className="mx-stroke" style={{animationDelay:`${.5+.03*i}s`}}/>
-          <circle cx={p.x} cy={p.y} r={16} fill="none" stroke="var(--line)" className="mx-stroke" style={{animationDelay:`${.6+.03*i}s`}}/>
-          <text x={p.x} y={p.y+4} textAnchor="middle" fill="#031827" fontWeight={700} fontSize="12">
-            {(data[i]?.energy ?? i+1)}
-          </text>
-          <text x={p.x} y={p.y-22} textAnchor="middle" fill="var(--gold)" fontSize="11" style={{opacity:0.85}}>
-            {data[i]?.name || ''}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 export default function Home() {
   const [name, setName] = useState('');
