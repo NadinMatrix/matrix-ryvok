@@ -90,8 +90,22 @@ export default function Home() {
             {loading ? 'Обробка…' : 'Розшифрувати матрицю'}
           </button>
         </form>
+
+        {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* CTA на повну PDF */}
+            <div style={{marginTop:24, textAlign:'center'}}>
+              <a href="#buy" style={styles.cta}>Отримати повну PDF-розшифровку</a>
+            </div>
+          </section>
+        )}
 {/* Результат від API */}
-{out?.text && (
+          {out?.text && (
   <div
     style={{
       background: 'rgba(25, 35, 45, 0.8)',
@@ -130,19 +144,7 @@ export default function Home() {
       {out.text}
     </pre>
   </div>
-        {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
-
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* CTA на повну PDF */}
-            <div style={{marginTop:24, textAlign:'center'}}>
-              <a href="#buy" style={styles.cta}>Отримати повну PDF-розшифровку</a>
-            </div>
-          </section>
-        )}
+      )}
           <div className="matrix-wrap">
           <ChakraWeb
   core={out?.core}
