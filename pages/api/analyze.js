@@ -8,7 +8,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
   try {
-    const { dob } = req.body || {};
+    const { name, dob, gender } = req.body || {};
+
+if (!dob || !name) {
+  return res.status(400).json({
+    error: 'Заповни ім’я та дату народження у форматі ДД.ММ.РРРР'
+  });
+}
     if (!dob) {
       return res.status(400).json({ error: "Вкажи дату народження у форматі ДД.ММ.ПППП" });
     }
