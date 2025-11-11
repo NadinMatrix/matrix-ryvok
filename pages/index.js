@@ -90,7 +90,47 @@ export default function Home() {
             {loading ? 'Обробка…' : 'Розшифрувати матрицю'}
           </button>
         </form>
-
+{/* Результат від API */}
+{out?.text && (
+  <div
+    style={{
+      background: 'rgba(25, 35, 45, 0.8)',
+      border: `1px solid ${COLORS.gold}`,
+      borderRadius: 14,
+      padding: '24px 20px',
+      marginTop: 28,
+      boxShadow: '0 0 28px rgba(225, 203, 146, 0.25)',
+      color: COLORS.text,
+      transition: 'all 0.6s ease-in-out',
+      animation: 'fadeIn 1s ease-in-out',
+    }}
+  >
+    <div
+      style={{
+        fontSize: 22,
+        fontWeight: 600,
+        color: COLORS.gold,
+        letterSpacing: '0.5px',
+        marginBottom: 12,
+        textAlign: 'center',
+        textTransform: 'uppercase',
+      }}
+    >
+      ✦ Результат ✦
+    </div>
+    <pre
+      style={{
+        whiteSpace: 'pre-wrap',
+        lineHeight: 1.6,
+        marginTop: 8,
+        fontFamily: 'inherit',
+        textAlign: 'justify',
+      }}
+    >
+      {out.text}
+    </pre>
+  </div>
+)}
         {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
 
         {/* Результат */}
