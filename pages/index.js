@@ -133,15 +133,6 @@ export default function Home() {
 )}
         {err && <div style={{color:COLORS.error, margin:'10px 4px 0'}}>{err}</div>}
 
-        {/* Результат від API */}
-{out?.text && (
-  <div style={styles.card}>
-    <div style={styles.big}>Результат</div>
-    <pre style={{whiteSpace:'pre-wrap', lineHeight:1.6, marginTop:12}}>
-      {out.text}
-    </pre>
-  </div>
-)}
                   </tbody>
                 </table>
               </div>
