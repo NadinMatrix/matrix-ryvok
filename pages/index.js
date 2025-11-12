@@ -200,19 +200,49 @@ function LogoMark() {
 }
 
 /** SVG-схема “сітка чакр” */
-function ChakraWeb({ svgSize = 520, data = [] }) {
-  const size = svgSize;
+function ChakraWeb({
+  svgSize = 520,
+  chakras = [],
+  showNumbers = true,
+  chakraColors = [],
+  core,
+}) {
+  const size   = svgSize;
   const rOuter = size * 0.40;
   const cx = size / 2, cy = size / 2;
 
+  // 7 точок по колу (початок зверху)
   const points = useMemo(() => {
     const arr = [];
     for (let i = 0; i < 7; i++) {
       const a = -Math.PI / 2 + i * (2 * Math.PI / 7);
-      arr.push({ x: cx + rOuter * Math.cos(a), y: cy + rOuter * Math.sin(a) });
+      arr.push({
+        x: cx + rOuter * Math.cos(a),
+        y: cy + rOuter * Math.sin(a),
+        ang: a,
+      });
     }
     return arr;
   }, [size]);
+
+  // Нормалізація енергії (0..1) для підсвічування та "хвостів".
+  // Якщо бекенд вже дає поля eNorm / tail — просто використай їх тут.
+  const enriched = points.map((p, i) => {
+    const c = chakras[i] || {};
+    const energy = Number(c.energy ?? 0);       // твоя фактична "сила" вузла
+    const maxRef = 9;                           // референс для нормалізації (підлаштуй)
+    const eNorm = Math.max(0, Math.min(1, energy / maxRef));
+    // "кармічний хвіст": довший, якщо мало енергії (дефіцит)
+    const tail = 1 - eNorm; // 0..1
+    return {
+      i, p, c, eNorm, tail,
+      color: chakraColors[i] || COLORS.gold,
+      number: c.number ?? (i + 1), // що показувати як цифру на вузлі
+    };
+  });
+
+  // Довжина хвоста у пікселях (макс)
+  const TAIL_MAX = rOuter * 0.25;
 
   return (
     <svg
@@ -220,100 +250,77 @@ function ChakraWeb({ svgSize = 520, data = [] }) {
       height={size}
       viewBox={`0 0 ${size} ${size}`}
       style={{
-        background: 'radial-gradient( circle at 50% 45%, rgba(255,255,255,0.04), transparent 65%)',
-        borderRadius: 0,            // без верхнього скруглення
-        border: `1px solid ${COLORS.line}`
+        background: 'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.04), transparent 65%)',
+        borderRadius: 0, // було 16 — прибрав скруглення зверху/скрізь
+        border: `1px solid ${COLORS.line}`,
       }}
     >
+      {/* орбіти */}
       {[0.18, 0.30, 0.42].map((k, i) => (
-        <circle key={i} cx={cx} cy={cy} r={size * k / 2} fill="none" stroke={COLORS.line} strokeDasharray="4 6" />
+        <circle key={i} cx={cx} cy={cy} r={size * k / 2}
+          fill="none" stroke={COLORS.line} strokeDasharray="4 6" />
       ))}
 
-      {points.map((p, i) => (
-        <line key={i}
-          x1={p.x} y1={p.y}
-          x2={points[(i + 1) % points.length].x}
-          y2={points[(i + 1) % points.length].y}
-          stroke={COLORS.line} strokeWidth="1" />
-      ))}
+      {/* лінії полігона між сусідніми чакрами */}
+      <polyline
+        fill="none"
+        stroke={COLORS.line}
+        strokeWidth="1.5"
+        points={enriched.map(e => `${e.p.x},${e.p.y}`).join(' ') + ` ${enriched[0].p.x},${enriched[0].p.y}`}
+      />
 
+      {/* центр */}
       <circle cx={cx} cy={cy} r={8} fill={COLORS.gold} />
       <text x={cx} y={cy - 16} textAnchor="middle" fill={COLORS.gold} fontSize="12" style={{ opacity: 0.85 }}>
         Енергія ядра
       </text>
 
-      {points.map((p, i) => (
-        <g key={i}>
-          <circle cx={p.x} cy={p.y} r={10} fill={COLORS.gold} />
-          <circle cx={p.x} cy={p.y} r={16} fill="none" stroke={COLORS.line} />
-          <text x={p.x} y={p.y + 4} textAnchor="middle" fill={COLORS.bg} fontWeight={700} fontSize="12">
-            {(data[i]?.energy ?? i + 1)}
-          </text>
-          <text x={p.x} y={p.y - 22} textAnchor="middle" fill={COLORS.gold} fontSize="11" style={{ opacity: 0.85 }}>
-            {data[i]?.name || ''}
-          </text>
-        </g>
-      ))}
+      {enriched.map(e => {
+        // координати хвоста (всередину, по радіусу до центру)
+        const tailLen = e.tail * TAIL_MAX;
+        const tx = e.p.x - Math.cos(e.p.ang) * tailLen;
+        const ty = e.p.y - Math.sin(e.p.ang) * tailLen;
+
+        return (
+          <g key={e.i}>
+            {/* "кармічний хвіст" — штрихована лінія до центру */}
+            {e.tail > 0.02 && (
+              <line
+                x1={e.p.x} y1={e.p.y} x2={tx} y2={ty}
+                stroke={e.color} strokeWidth="2" strokeDasharray="3 4" opacity="0.9"
+              />
+            )}
+
+            {/* кільце (рівень) — товщина/прозорість за енергією */}
+            <circle cx={e.p.x} cy={e.p.y} r={16} fill="none"
+                    stroke={e.color} strokeWidth={1.5} opacity={0.7}/>
+            {/* заповнення */}
+            <circle cx={e.p.x} cy={e.p.y} r={10}
+                    fill={e.color} opacity={0.85}/>
+
+            {/* число (цифра вузла) */}
+            {showNumbers && (
+              <text x={e.p.x} y={e.p.y + 4}
+                    textAnchor="middle"
+                    fill={COLORS.bg}
+                    fontWeight={700}
+                    fontSize="12">
+                {e.number}
+              </text>
+            )}
+
+            {/* назва чакри під вузлом */}
+            <text x={e.p.x} y={e.p.y - 22}
+                  textAnchor="middle"
+                  fill={e.color}
+                  fontSize="11"
+                  style={{ opacity: 0.95 }}>
+              {e.c?.name || ''}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 }
 
-const styles = {
-  form: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 16,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    padding: '0 8px',
-  },
-  field: { flex: '1 1 260px', minWidth: 240 },
-  label: { display: 'block', marginBottom: 6, fontSize: 12, opacity: 0.85, color: 'rgba(255,255,255,0.85)' },
-  input: {
-    width: '100%', padding: '14px 16px', borderRadius: 12,
-    border: `1px solid ${COLORS.gold}55`, background: 'transparent', color: COLORS.text, fontSize: 16,
-  },
-  btn: {
-    flex: '0 0 auto', padding: '14px 28px', borderRadius: 14, border: 'none',
-    background: COLORS.gold, color: '#031827', fontWeight: 600, fontSize: 15,
-    boxShadow: '0 0 22px rgba(225,203,146,0.25)', cursor: 'pointer', transition: 'all 0.25s ease',
-  },
-
-  // центр і рамка для SVG, без верхнього скруглення
-  webWrap: {
-    marginTop: 24,
-    border: `1px solid ${COLORS.line}`,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-    padding: '16px 16px 20px',
-    overflow: 'hidden',
-    display: 'flex',
-    justifyContent: 'center',
-  },
-
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    marginTop: 20,
-  },
-  error: { color: COLORS.error, margin: '10px 4px 0', textAlign: 'center' },
-  cta: {
-    display: 'inline-block',
-    padding: '10px 16px',
-    border: `1px solid ${COLORS.gold}`,
-    borderRadius: 12,
-    textDecoration: 'none',
-    color: COLORS.gold
-  },
-};
-
-// Адаптив (за бажанням можна доповнювати)
-styles['@media'] = `
-  @media (max-width: 860px){
-    .gridWrap { grid-template-columns: 1fr !important; }
-    .form { grid-template-columns: 1fr; }
-    .btn { width:100%; }
-  }
-`;
