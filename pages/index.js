@@ -96,7 +96,20 @@ export default function Home() {
 
         {/* Матриця (по центру, без верхнього скруглення) */}
         <div style={styles.webWrap}>
-          <ChakraWeb svgSize={520} data={out?.chakras || []} />
+          <ChakraWeb
+  core={out?.core}
+  chakras={out?.chakras || []}
+  showNumbers={true}
+  chakraColors={[
+    '#E53935', // 1 Муладхара (червоний)
+    '#FB8C00', // 2 Свадхістана (помаранчевий)
+    '#FDD835', // 3 Маніпура (жовтий)
+    '#43A047', // 4 Анахата (зелений)
+    '#1E88E5', // 5 Вішудха (блакитний/синій)
+    '#5E35B1', // 6 Аджна (індиго)
+    '#8E24AA', // 7 Сахасрара (фіолетовий)
+  ]}
+/>
         </div>
 
         {/* Таблиця */}
