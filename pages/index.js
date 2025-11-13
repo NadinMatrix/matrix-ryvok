@@ -1,6 +1,6 @@
 // pages/index.js
 import React, { useMemo, useState } from 'react';
-import { ArcanaMatrixWeb } from '../components/ArcanaMatrixWeb';
+import ArcanaMatrixWeb  from '../components/ArcanaMatrixWeb';
 
 const COLORS = {
   bg: '#031827',         // темний індіго
