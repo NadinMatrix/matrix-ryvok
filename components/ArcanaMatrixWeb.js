@@ -6,48 +6,45 @@ const COLORS = {
   gold: '#E1CB92',
   accent: '#18C3CB',
   line: 'rgba(225,203,146,0.45)',
-  lineStrong: '#E1CB92',
+  lineBold: 'rgba(225,203,146,0.9)',
   dot: '#FF6B81',
-  ageDot: 'rgba(225,203,146,0.55)',
+  yearDot: 'rgba(225,203,146,0.55)',
 };
 
-// налаштування вікових точок
-const AGE_FROM = 0;
-const AGE_TO = 75;
-const AGE_STEP = 5;
-// старт кута для нуля років (у градусах, 0° — вправо, 90° — вниз)
-// 210° ≈ сектор біля енергії 6 (зліва знизу)
-const AGE_START_DEG = 210;
-
+/**
+ * Авторська арканна матриця (8-кутник + ромб + квадрат)
+ * size – розмір SVG, values – масив чисел арканів (до 8)
+ */
 export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
   const cx = size / 2;
   const cy = size / 2;
 
-  const rOuter = size * 0.42;      // радіус 8-кутника
-  const rDiamond = size * 0.23;    // ромб (повернутий квадрат)
-  const rAxisSquare = size * 0.18; // прямий квадрат усередині
-  const rOrbitsMax = size * 0.23;  // макс радіус орбіт
-  const rAges = size * 0.46;       // коло років
+  // Радіуси
+  const rArcana = size * 0.38;         // коло 1–8
+  const rDiamond = size * 0.26;        // зовнішній ромб
+  const rSquare = size * 0.30 / 2;     // «30 радіус» – внутрішній квадрат
+  const orbitRadii = [0.18, 0.30, 0.42].map(k => (size * k) / 2);
+  const rYears = size * 0.46;          // коло років (0–75)
 
-  // 8 вершин восьмикутника
-  const points = useMemo(() => {
+  // 8 вершин восьмикутника (арканів)
+  const arcanaPoints = useMemo(() => {
     const arr = [];
     for (let i = 0; i < 8; i++) {
-      const a = (-Math.PI / 2) + (i * 2 * Math.PI) / 8; // починаємо з верху
+      const a = -Math.PI / 2 + (i * 2 * Math.PI) / 8;
       arr.push({
-        x: cx + rOuter * Math.cos(a),
-        y: cy + rOuter * Math.sin(a),
+        x: cx + rArcana * Math.cos(a),
+        y: cy + rArcana * Math.sin(a),
         angle: a,
       });
     }
     return arr;
-  }, [cx, cy, rOuter]);
+  }, [cx, cy, rArcana]);
 
-  // ромб (повернутий квадрат)
-  const diamond = useMemo(() => {
+  // Ромб (квадрат, повернутий на 45°)
+  const diamondPoints = useMemo(() => {
     const arr = [];
     for (let i = 0; i < 4; i++) {
-      const a = (-Math.PI / 2) + (i * 2 * Math.PI) / 4;
+      const a = -Math.PI / 2 + (i * 2 * Math.PI) / 4;
       arr.push({
         x: cx + rDiamond * Math.cos(a),
         y: cy + rDiamond * Math.sin(a),
@@ -56,78 +53,60 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
     return arr;
   }, [cx, cy, rDiamond]);
 
-  // прямий квадрат по осях
-  const axisSquare = useMemo(() => {
-    const r = rAxisSquare;
+  // Прямий квадрат (осьовий), радіус ~30
+  const squarePoints = useMemo(() => {
     return [
-      { x: cx - r, y: cy - r },
-      { x: cx + r, y: cy - r },
-      { x: cx + r, y: cy + r },
-      { x: cx - r, y: cy + r },
+      { x: cx - rSquare, y: cy - rSquare },
+      { x: cx + rSquare, y: cy - rSquare },
+      { x: cx + rSquare, y: cy + rSquare },
+      { x: cx - rSquare, y: cy + rSquare },
     ];
-  }, [cx, cy, rAxisSquare]);
+  }, [cx, cy, rSquare]);
 
-  // вікові точки по колу
-  const ageMarks = useMemo(() => {
-    const res = [];
-    const count = (AGE_TO - AGE_FROM) / AGE_STEP + 1;
-    const stepDeg = 360 / count;
-
-    for (let i = 0; i < count; i++) {
-      const age = AGE_FROM + i * AGE_STEP;
-      const deg = AGE_START_DEG + stepDeg * i;
-      const rad = (deg * Math.PI) / 180;
-
-      res.push({
-        age,
-        x: cx + rAges * Math.cos(rad),
-        y: cy + rAges * Math.sin(rad),
-      });
+  // Роки по колу (0–75, крок 5) — старт з кута, де стоїть аркан 6
+  const yearMarks = useMemo(() => {
+    const ages = [];
+    for (let age = 0; age <= 75; age += 5) {
+      ages.push(age);
     }
-    return res;
-  }, [cx, cy, rAges]);
 
-  // допоміжна функція для стрілки
-  const arrowHead = (x1, y1, x2, y2, sizeArrow = 10) => {
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    const a1 = angle + Math.PI * 0.8;
-    const a2 = angle - Math.PI * 0.8;
-    return [
-      x2,
-      y2,
-      x2 + sizeArrow * Math.cos(a1),
-      y2 + sizeArrow * Math.sin(a1),
-      x2 + sizeArrow * Math.cos(a2),
-      y2 + sizeArrow * Math.sin(a2),
-    ];
+    const angleFor6 =
+      -Math.PI / 2 + (5 * 2 * Math.PI) / 8; // той самий кут, що й для вершини 6
+    const step = (2 * Math.PI) / ages.length;
+
+    return ages.map((age, index) => {
+      const a = angleFor6 + step * index;
+      return {
+        age,
+        x: cx + rYears * Math.cos(a),
+        y: cy + rYears * Math.sin(a),
+      };
+    });
+  }, [cx, cy, rYears]);
+
+  // Координати для іконок
+  const energyIcon = {
+    x: cx - rSquare * 0.9,
+    y: cy + rSquare * 0.05,
   };
 
-  // координати для ліній роду (від центру до низу ліворуч / праворуч)
-  const maleEnd = {
-    x: cx - rDiamond * 0.85,
-    y: cy + rDiamond * 0.85,
-  };
-  const femaleEnd = {
-    x: cx + rDiamond * 0.85,
-    y: cy + rDiamond * 0.85,
+  const moneyIcon = {
+    x: cx + rSquare * 0.9,
+    y: cy + rSquare * 0.1,
   };
 
-  // позиції іконок (усередині внутрішнього квадрата)
-  const iconEnergy = {
-    x: cx - rAxisSquare * 0.7,
-    y: cy,
-  }; // ⚡ – зліва по горизонталі
-  const iconMoney = {
-    x: cx + rAxisSquare * 0.75,
-    y: cy + rAxisSquare * 0.05,
-  }; // $ – справа трохи нижче горизонталі
-  const iconHeart = {
-    x: cx + rAxisSquare * 0.3,
-    y: cy + rAxisSquare * 0.9,
-  }; // ♥ – правий нижній сектор
+  const heartIcon = {
+    x: cx + rSquare * 0.1,
+    y: cy + rSquare * 0.95,
+  };
 
-  const valuesSafe = [...values];
-  while (valuesSafe.length < 8) valuesSafe.push(valuesSafe.length + 1);
+  const heartPath = `
+    M ${heartIcon.x} ${heartIcon.y}
+    c -4 -6 -12 -6 -16 0
+    c -4 6 -1 14 8 18
+    c 9 -4 12 -12 8 -18
+    z
+  `;
 
   return (
     <div
@@ -146,157 +125,97 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
           display: 'block',
           margin: '0 auto',
           background:
-            'radial-gradient(circle at 50% 35%, rgba(255,255,255,0.06), transparent 70%)',
+            'radial-gradient(circle at 50% 35%, rgba(255,255,255,0.04), transparent 70%)',
           borderRadius: 24,
-          border: `1px solid ${COLORS.line}`,
         }}
       >
-        {/* фонова темна панель */}
-        <rect
-          x={size * 0.04}
-          y={size * 0.04}
-          width={size * 0.92}
-          height={size * 0.92}
-          rx={26}
-          ry={26}
-          fill="none"
-          stroke={COLORS.line}
-          strokeWidth="1.2"
-        />
-
-        {/* радіальні хвилі */}
-        {[0.26, 0.32, 0.38, 0.44].map((k, i) => (
-          <circle
-            key={`bg-${i}`}
-            cx={cx}
-            cy={cy}
-            r={size * k * 0.9}
-            fill="none"
-            stroke={COLORS.line}
-            strokeOpacity={0.12}
-          />
-        ))}
-
-        {/* орбіти */}
-        {[0.25, 0.40, 0.55].map((ratio, i) => (
+        {/* мінімалістичний фон – тонкі концентричні кола */}
+        {orbitRadii.map((r, i) => (
           <circle
             key={`orbit-${i}`}
             cx={cx}
             cy={cy}
-            r={rOrbitsMax * ratio}
+            r={r}
             fill="none"
             stroke={COLORS.line}
-            strokeDasharray="4 6"
+            strokeDasharray={i === 2 ? '6 10' : '4 8'}
           />
         ))}
 
-        {/* осі (вертикаль / горизонталь) */}
+        {/* Вертикаль / горизонталь */}
         <line
           x1={cx}
-          y1={cy - rOrbitsMax * 1.05}
+          y1={cy - rDiamond * 1.4}
           x2={cx}
-          y2={cy + rOrbitsMax * 1.05}
+          y2={cy + rDiamond * 1.4}
           stroke={COLORS.line}
-          strokeDasharray="6 6"
+          strokeDasharray="4 6"
         />
         <line
-          x1={cx - rOrbitsMax * 1.05}
+          x1={cx - rDiamond * 1.4}
           y1={cy}
-          x2={cx + rOrbitsMax * 1.05}
+          x2={cx + rDiamond * 1.4}
           y2={cy}
           stroke={COLORS.line}
-          strokeDasharray="6 6"
+          strokeDasharray="4 6"
         />
 
-        {/* ромб (повернутий квадрат) */}
+        {/* Діагоналі роду */}
+        {/* Чоловічий рід — зліва вгору ↘ вправо вниз (синя умовна лінія) */}
+        <line
+          x1={cx - rDiamond * 1.4}
+          y1={cy + rDiamond * 1.4}
+          x2={cx + rDiamond * 1.4}
+          y2={cy - rDiamond * 1.4}
+          stroke={COLORS.line}
+          strokeDasharray="4 6"
+        />
+        {/* Жіночий рід — справа вгору ↙ вліво вниз */}
+        <line
+          x1={cx - rDiamond * 1.4}
+          y1={cy - rDiamond * 1.4}
+          x2={cx + rDiamond * 1.4}
+          y2={cy + rDiamond * 1.4}
+          stroke={COLORS.line}
+          strokeDasharray="4 6"
+        />
+
+        {/* Підписи роду */}
+        <text
+          x={cx - rDiamond * 1.1}
+          y={cy + rDiamond * 1.1}
+          fill={COLORS.gold}
+          fontSize="11"
+        >
+          Чоловічий рід
+        </text>
+        <text
+          x={cx + rDiamond * 0.6}
+          y={cy + rDiamond * 1.1}
+          fill={COLORS.gold}
+          fontSize="11"
+        >
+          Жіночий рід
+        </text>
+
+        {/* Ромб */}
         <polygon
-          points={diamond.map(p => `${p.x},${p.y}`).join(' ')}
+          points={diamondPoints.map(p => `${p.x},${p.y}`).join(' ')}
           fill="none"
-          stroke={COLORS.lineStrong}
-          strokeWidth="1.5"
+          stroke={COLORS.lineBold}
+          strokeWidth="1.4"
         />
 
-        {/* внутрішній прямий квадрат (штриховий) */}
+        {/* Внутрішній квадрат (осьовий) */}
         <polygon
-          points={axisSquare.map(p => `${p.x},${p.y}`).join(' ')}
+          points={squarePoints.map(p => `${p.x},${p.y}`).join(' ')}
           fill="none"
           stroke={COLORS.line}
-          strokeDasharray="8 6"
+          strokeWidth="1"
+          strokeDasharray="4 6"
         />
 
-        {/* лінії роду: чоловічий (зліва вниз) */}
-        <g>
-          <line
-            x1={cx}
-            y1={cy}
-            x2={maleEnd.x}
-            y2={maleEnd.y}
-            stroke={COLORS.line}
-            strokeWidth="1.4"
-          />
-          {(() => {
-            const [x2, y2, x3, y3, x4, y4] = arrowHead(
-              cx,
-              cy,
-              maleEnd.x,
-              maleEnd.y,
-              9
-            );
-            return (
-              <polygon
-                points={`${x2},${y2} ${x3},${y3} ${x4},${y4}`}
-                fill={COLORS.line}
-              />
-            );
-          })()}
-          <text
-            x={cx - rOuter * 0.55}
-            y={cy + rOuter * 0.12}
-            textAnchor="middle"
-            fill={COLORS.gold}
-            fontSize="11"
-          >
-            Чоловічий рід
-          </text>
-        </g>
-
-        {/* лінії роду: жіночий (справа вниз) */}
-        <g>
-          <line
-            x1={cx}
-            y1={cy}
-            x2={femaleEnd.x}
-            y2={femaleEnd.y}
-            stroke={COLORS.line}
-            strokeWidth="1.4"
-          />
-          {(() => {
-            const [x2, y2, x3, y3, x4, y4] = arrowHead(
-              cx,
-              cy,
-              femaleEnd.x,
-              femaleEnd.y,
-              9
-            );
-            return (
-              <polygon
-                points={`${x2},${y2} ${x3},${y3} ${x4},${y4}`}
-                fill={COLORS.line}
-              />
-            );
-          })()}
-          <text
-            x={cx + rOuter * 0.55}
-            y={cy + rOuter * 0.12}
-            textAnchor="middle"
-            fill={COLORS.gold}
-            fontSize="11"
-          >
-            Жіночий рід
-          </text>
-        </g>
-
-        {/* центр */}
+        {/* Ядро */}
         <circle cx={cx} cy={cy} r={9} fill={COLORS.gold} />
         <text
           x={cx}
@@ -309,103 +228,87 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
           Ядро
         </text>
 
-        {/* векторна іконка енергії ⚡ */}
-        <g transform={`translate(${iconEnergy.x}, ${iconEnergy.y})`}>
-          <polygon
-            points="-6,-2 0,-10 -2,-2 4,-4 0,6 2,-2"
-            fill={COLORS.accent}
-            stroke={COLORS.gold}
-            strokeWidth="0.6"
-          />
-        </g>
-
-        {/* векторна іконка грошей $ */}
-        <g transform={`translate(${iconMoney.x}, ${iconMoney.y})`}>
-          <circle
-            cx="0"
-            cy="0"
-            r="11"
-            fill="none"
-            stroke={COLORS.gold}
-            strokeWidth="1"
-          />
-          <text
-            x="0"
-            y="4"
-            textAnchor="middle"
-            fontSize="12"
-            fill={COLORS.gold}
-            fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-          >
-            $
-          </text>
-        </g>
-
-        {/* векторна іконка серця ❤️ */}
-        <g transform={`translate(${iconHeart.x}, ${iconHeart.y}) scale(0.9)`}>
-          <path
-            d="M0 4 C -5 -2, -4 -7, 0 -5 C 4 -7, 5 -2, 0 4 Z"
-            fill={COLORS.dot}
-            stroke={COLORS.dot}
-            strokeWidth="0.5"
-          />
-        </g>
-
-        {/* 8-кутник + лінії від центру до вершин */}
+        {/* 8-кутник – орбіта арканів */}
         <polygon
-          points={points.map(p => `${p.x},${p.y}`).join(' ')}
+          points={arcanaPoints.map(p => `${p.x},${p.y}`).join(' ')}
           fill="none"
-          stroke={COLORS.line}
-          strokeWidth="1.3"
+          stroke={COLORS.lineBold}
+          strokeWidth="1.2"
         />
 
-        {points.map((p, i) => {
-          const v = valuesSafe[i];
+        {/* Іконка енергії (блискавка) */}
+        <polyline
+          points={[
+            [energyIcon.x - 6, energyIcon.y - 4],
+            [energyIcon.x + 1, energyIcon.y - 4],
+            [energyIcon.x - 3, energyIcon.y + 6],
+            [energyIcon.x + 4, energyIcon.y + 6],
+          ]
+            .map(p => p.join(','))
+            .join(' ')}
+          fill="none"
+          stroke="#FFC400"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+
+        {/* Іконка грошей (₴ / $) */}
+        <text
+          x={moneyIcon.x}
+          y={moneyIcon.y}
+          fill={COLORS.gold}
+          fontSize="20"
+          fontWeight="600"
+          textAnchor="middle"
+        >
+          $
+        </text>
+
+        {/* Іконка серця (векторний path) */}
+        <path d={heartPath} fill={COLORS.dot} />
+
+        {/* Роки по колу */}
+        {yearMarks.map(({ age, x, y }, i) => (
+          <g key={`age-${age}-${i}`}>
+            <circle cx={x} cy={y} r={3} fill={COLORS.yearDot} />
+            <text
+              x={x}
+              y={y - 6}
+              textAnchor="middle"
+              fill={COLORS.yearDot}
+              fontSize="9"
+            >
+              {age}
+            </text>
+          </g>
+        ))}
+
+        {/* 8 точок арканів */}
+        {arcanaPoints.map((p, i) => {
+          const v = values[i] ?? i + 1; // поки заглушка 1..8
           return (
-            <g key={`arc-${i}`}>
-              {/* промені від центру */}
-              <line
-                x1={cx}
-                y1={cy}
-                x2={p.x}
-                y2={p.y}
-                stroke={COLORS.line}
-                strokeDasharray="3 5"
+            <g key={`arcana-${i}`}>
+              <circle cx={p.x} cy={p.y} r={18} fill={COLORS.bg} />
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={22}
+                fill="none"
+                stroke={COLORS.dot}
               />
-              {/* зовнішнє кільце точки */}
-              <circle cx={p.x} cy={p.y} r={22} fill="none" stroke={COLORS.dot} />
-              {/* внутрішній круг */}
-              <circle cx={p.x} cy={p.y} r={16} fill={COLORS.bg} />
-              {/* цифра аркана */}
               <text
                 x={p.x}
                 y={p.y + 4}
                 textAnchor="middle"
                 fill={COLORS.dot}
                 fontWeight="700"
-                fontSize="13"
+                fontSize="14"
               >
                 {v}
               </text>
             </g>
           );
         })}
-
-        {/* вікові точки по колу */}
-        {ageMarks.map((m, idx) => (
-          <g key={`age-${idx}`}>
-            <circle cx={m.x} cy={m.y} r={3} fill={COLORS.ageDot} />
-            <text
-              x={m.x}
-              y={m.y + 11}
-              textAnchor="middle"
-              fill={COLORS.ageDot}
-              fontSize="9"
-            >
-              {m.age}
-            </text>
-          </g>
-        ))}
       </svg>
     </div>
   );
