@@ -248,6 +248,10 @@ export default function Home() {
             </pre>
           </div>
         )}
+        {/* НОВА АРКАННА МАТРИЦЯ */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
+          <ArcanaMatrixWeb size={520} />
+        </div>
       </main>
     </div>
   );
