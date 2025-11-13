@@ -1,5 +1,6 @@
 // pages/index.js
 import React, { useMemo, useState } from 'react';
+import { ArcanaMatrixWeb } from '../components/ArcanaMatrixWeb';
 
 const COLORS = {
   bg: '#031827',         // темний індіго
@@ -156,7 +157,7 @@ export default function Home() {
 
         {/* Матриця (по центру, без верхнього скруглення) */}
         <div style={styles.webWrap}>
-          <ChakraWeb svgSize={520} data={out?.chakras || []} />
+          {/* <ChakraWeb core={out?.core} chakras={out?.chakras || []}/> */}
         </div>
 
         {/* Таблиця */}
@@ -229,6 +230,14 @@ export default function Home() {
                 fontFamily: 'inherit',
                 textAlign: 'justify',
               }}
+{/* НОВА АРКАННА МАТРИЦЯ */}
+<div style={{ display:'flex', justifyContent:'center', marginTop:40 }}>
+  <ArcanaMatrixWeb
+    size={520}
+    points={demoArcanaPoints}
+    centerArcana={11}
+  />
+</div>
             >
               {out.text}
             </pre>
