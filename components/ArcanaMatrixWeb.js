@@ -13,12 +13,10 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
   const cx = size / 2;
   const cy = size / 2;
 
-  // зовнішній радіус восьмикутника
   const rOuter = size * 0.42;
-  // внутрішній квадрат (для родових / духовних енергій)
   const rInner = size * 0.33;
 
-  // 8 вершин восьмикутника
+  // --- 8 вершин ---
   const points = useMemo(() => {
     const arr = [];
     for (let i = 0; i < 8; i++) {
@@ -26,17 +24,16 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
       arr.push({
         x: cx + rOuter * Math.cos(a),
         y: cy + rOuter * Math.sin(a),
-        ang: a,
       });
     }
     return arr;
   }, [cx, cy, rOuter]);
 
-  // 4 вершини ВНУТРІШНЬОГО ПРЯМОГО квадрата
+  // --- квадрат ---
   const square = useMemo(() => {
     const arr = [];
     for (let i = 0; i < 4; i++) {
-      const a = -Math.PI / 2 + (i * 2 * Math.PI) / 4; // 0°, 90°, 180°, 270°
+      const a = -Math.PI / 2 + (i * 2 * Math.PI) / 4;
       arr.push({
         x: cx + rInner * Math.cos(a),
         y: cy + rInner * Math.sin(a),
@@ -45,16 +42,14 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
     return arr;
   }, [cx, cy, rInner]);
 
-  // орбіти для глибин (для майбутніх 22 енергій)
-  const orbits = [0.18, 0.30, 0.42];
-
   return (
     <div
       style={{
         width: '100%',
         display: 'flex',
         justifyContent: 'center',
-        margin: '40px auto 0',
+        alignItems: 'center',
+        margin: '40px auto',
       }}
     >
       <svg
@@ -70,8 +65,9 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
           border: `1px solid ${COLORS.line}`,
         }}
       >
+
         {/* орбіти */}
-        {orbits.map((k, i) => (
+        {[0.18, 0.30, 0.42].map((k, i) => (
           <circle
             key={i}
             cx={cx}
@@ -83,93 +79,61 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
           />
         ))}
 
-        {/* головний хрест: небо / земля, ліва / права півсфера */}
-        {/* вертикаль */}
-        <line
-          x1={cx}
-          y1={cy - rOuter}
-          x2={cx}
-          y2={cy + rOuter}
-          stroke={COLORS.line}
-          strokeDasharray="4 6"
-        />
-        {/* горизонталь */}
-        <line
-          x1={cx - rOuter}
-          y1={cy}
-          x2={cx + rOuter}
-          y2={cy}
-          stroke={COLORS.line}
-          strokeDasharray="4 6"
-        />
-
-        {/* діагоналі: чоловічий / жіночий рід */}
-        {/* чоловічий рід — ліва діагональ */}
-        <line
-          x1={cx - rOuter}
-          y1={cy + rOuter}
-          x2={cx + rOuter}
-          y2={cy - rOuter}
-          stroke={COLORS.line}
-          strokeDasharray="4 6"
-        />
-        {/* жіночий рід — права діагональ */}
-        <line
-          x1={cx - rOuter}
-          y1={cy - rOuter}
-          x2={cx + rOuter}
-          y2={cy + rOuter}
-          stroke={COLORS.line}
-          strokeDasharray="4 6"
-        />
-
-        {/* підписи НЕБО / ЗЕМЛЯ */}
-        <text
-          x={cx}
-          y={cy - rOuter - 10}
-          textAnchor="middle"
-          fill={COLORS.gold}
-          fontSize="11"
-        >
-          Небо
-        </text>
-        <text
-          x={cx}
-          y={cy + rOuter + 18}
-          textAnchor="middle"
-          fill={COLORS.gold}
-          fontSize="11"
-        >
-          Земля
-        </text>
-
-        {/* підписи РОДОВИХ ЛІНІЙ (акуратно, без «наляпано») */}
-        <text
-          x={cx - rInner - 40}
-          y={cy + rInner + 16}
-          fill={COLORS.gold}
-          fontSize="10"
-        >
-          Чоловічий рід
-        </text>
-        <text
-          x={cx + rInner - 10}
-          y={cy + rInner + 16}
-          fill={COLORS.gold}
-          fontSize="10"
-        >
-          Жіночий рід
-        </text>
-
-        {/* ВНУТРІШНІЙ ПРЯМИЙ КВАДРАТ */}
+        {/* восьмикутник */}
         <polygon
-          points={square.map((p) => `${p.x},${p.y}`).join(' ')}
+          points={points.map(p => `${p.x},${p.y}`).join(' ')}
+          fill="none"
+          stroke={COLORS.line}
+          strokeWidth="1.5"
+        />
+
+        {/* квадрат */}
+        <polygon
+          points={square.map(p => `${p.x},${p.y}`).join(' ')}
           fill="none"
           stroke={COLORS.gold}
           strokeWidth="1.4"
         />
 
-        {/* ЦЕНТР – ЯДРО */}
+        {/* вертикаль НЕБО–ЗЕМЛЯ */}
+        <line
+          x1={cx}
+          y1={cy - rInner}
+          x2={cx}
+          y2={cy + rInner}
+          stroke={COLORS.line}
+          strokeDasharray="4 6"
+        />
+        <text
+          x={cx}
+          y={cy - rInner - 10}
+          textAnchor="middle"
+          fill={COLORS.gold}
+          fontSize="12"
+        >
+          Небо
+        </text>
+        <text
+          x={cx}
+          y={cy + rInner + 20}
+          textAnchor="middle"
+          fill={COLORS.gold}
+          fontSize="12"
+        >
+          Земля
+        </text>
+
+        {/* горизонталь */}
+        <line
+          x1={cx - rInner}
+          y1={cy}
+          x2={cx + rInner}
+          y2={cy}
+          stroke={COLORS.line}
+          strokeDasharray="4 6"
+        />
+
+        {/* центр */}
         <circle cx={cx} cy={cy} r={9} fill={COLORS.gold} />
         <text
           x={cx}
@@ -182,20 +146,71 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
           Ядро
         </text>
 
-        {/* 8 зовнішніх арканів по восьмикутнику */}
-        <polygon
-          points={points.map((p) => `${p.x},${p.y}`).join(' ')}
-          fill="none"
+        {/* --- РОДОВІ ЛІНІЇ --- */}
+        {/* Чоловічий (зліва вниз) */}
+        <line
+          x1={cx}
+          y1={cy}
+          x2={cx - rInner}
+          y2={cy + rInner}
           stroke={COLORS.line}
-          strokeWidth="1.5"
+          strokeDasharray="4 6"
         />
+        <text
+          x={cx - rInner - 10}
+          y={cy + rInner}
+          fill={COLORS.gold}
+          fontSize="12"
+        >
+          Чоловічий рід
+        </text>
 
+        {/* Жіночий (справа вниз) */}
+        <line
+          x1={cx}
+          y1={cy}
+          x2={cx + rInner}
+          y2={cy + rInner}
+          stroke={COLORS.line}
+          strokeDasharray="4 6"
+        />
+        <text
+          x={cx + rInner + 10}
+          y={cy + rInner}
+          fill={COLORS.gold}
+          fontSize="12"
+        >
+          Жіночий рід
+        </text>
+
+        {/* --- ІКОНКИ ($ і ❤️) --- */}
+        {/* $ — нижче горизонталі по центру */}
+        <text
+          x={cx}
+          y={cy + rInner * 0.35}
+          textAnchor="middle"
+          fill={COLORS.gold}
+          fontSize="16"
+        >
+          $
+        </text>
+
+        {/* ❤️ — нижній правий сектор */}
+        <text
+          x={cx + rInner * 0.35}
+          y={cy + rInner * 0.35}
+          textAnchor="middle"
+          fill={COLORS.dot}
+          fontSize="18"
+        >
+          ❤️
+        </text>
+
+        {/* 8 точок арканів */}
         {points.map((p, i) => {
-          // поки заглушки 1..8 — потім сюди заведемо реальні значення
           const v = values[i] ?? i + 1;
           return (
             <g key={i}>
-              {/* промінь до центру */}
               <line
                 x1={cx}
                 y1={cy}
@@ -204,16 +219,8 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
                 stroke={COLORS.line}
                 strokeDasharray="3 5"
               />
-              {/* подвійне коло */}
               <circle cx={p.x} cy={p.y} r={16} fill={COLORS.bg} />
-              <circle
-                cx={p.x}
-                cy={p.y}
-                r={22}
-                fill="none"
-                stroke={COLORS.dot}
-              />
-              {/* номер аркану */}
+              <circle cx={p.x} cy={p.y} r={22} fill="none" stroke={COLORS.dot} />
               <text
                 x={p.x}
                 y={p.y + 4}
@@ -227,35 +234,6 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
             </g>
           );
         })}
-
-        {/* МІСЦЯ ДЛЯ АВТОРСЬКИХ ІКОНОК (❤️, $, ⚡) – акуратно, без перевантаження */}
-        {/* приклад: іконка любові трохи нижче центру */}
-        <text
-          x={cx + rInner * 0.35}
-          y={cy + rInner * 0.15}
-          fontSize="14"
-          fill={COLORS.dot}
-        >
-          ❤
-        </text>
-        {/* приклад: фінанси правіше від центру */}
-        <text
-          x={cx + rInner * 0.6}
-          y={cy}
-          fontSize="14"
-          fill={COLORS.gold}
-        >
-          $
-        </text>
-        {/* приклад: енергія / трансформація вище центру */}
-        <text
-          x={cx - rInner * 0.55}
-          y={cy - rInner * 0.1}
-          fontSize="14"
-          fill={COLORS.accent}
-        >
-          ⚡
-        </text>
       </svg>
     </div>
   );
