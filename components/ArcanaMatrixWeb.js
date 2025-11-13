@@ -48,7 +48,6 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
 
   return (
     <div
-  <div
   style={{
     width: '100%',
     display: 'flex',
