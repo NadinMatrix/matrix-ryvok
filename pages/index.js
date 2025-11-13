@@ -241,6 +241,7 @@ export default function Home() {
                 marginTop: 8,
                 fontFamily: 'inherit',
                 textAlign: 'justify',
+                >
               }}
 {/* НОВА АРКАННА МАТРИЦЯ */}
 <div style={{ display:'flex', justifyContent:'center', marginTop:40 }}>
