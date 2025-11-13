@@ -111,10 +111,9 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
 
         {/* 8 точок арканів */}
         {points.map((p, i) => {
-          const v = values[i] ?? i + 1; // поки що – заглушка 1..8
+          const v = values[i] ?? i + 1; // поки заглушка 1..8
           return (
             <g key={i}>
-              {/* промінь до центру */}
               <line
                 x1={cx}
                 y1={cy}
@@ -123,10 +122,8 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
                 stroke={COLORS.line}
                 strokeDasharray="3 5"
               />
-              {/* кола */}
               <circle cx={p.x} cy={p.y} r={16} fill={COLORS.bg} />
               <circle cx={p.x} cy={p.y} r={22} fill="none" stroke={COLORS.dot} />
-              {/* номер аркану */}
               <text
                 x={p.x}
                 y={p.y + 4}
@@ -144,4 +141,3 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
     </div>
   );
 }
-export default ArcanaMatrixWeb;
