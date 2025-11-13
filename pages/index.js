@@ -206,7 +206,7 @@ export default function Home() {
           </a>
         </div>
 
-        {/* Результат від API */}
+                {/* Результат від API */}
         {out?.text && (
           <div
             style={{
@@ -232,8 +232,9 @@ export default function Home() {
                 textTransform: 'uppercase',
               }}
             >
-              ✦ РЕЗУЛЬТАТ ✦
+              ✦ Результат ✦
             </div>
+
             <pre
               style={{
                 whiteSpace: 'pre-wrap',
@@ -241,16 +242,7 @@ export default function Home() {
                 marginTop: 8,
                 fontFamily: 'inherit',
                 textAlign: 'justify',
-                >
               }}
-{/* НОВА АРКАННА МАТРИЦЯ */}
-<div style={{ display:'flex', justifyContent:'center', marginTop:40 }}>
-  <ArcanaMatrixWeb
-    size={520}
-    points={demoArcanaPoints}
-    centerArcana={11}
-  />
-</div>
             >
               {out.text}
             </pre>
