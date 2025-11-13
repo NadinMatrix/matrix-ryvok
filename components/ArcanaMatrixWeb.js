@@ -144,3 +144,4 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
     </div>
   );
 }
+export default ArcanaMatrixWeb;
