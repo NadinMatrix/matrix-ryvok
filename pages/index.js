@@ -234,7 +234,6 @@ export default function Home() {
             >
               ✦ Результат ✦
             </div>
-
             <pre
               style={{
                 whiteSpace: 'pre-wrap',
