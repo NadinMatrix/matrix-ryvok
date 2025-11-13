@@ -19,6 +19,18 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [out, setOut] = useState(null);
+  
+  // тестові дані, щоб побачити 8-кутник
+  const demoArcanaPoints = [
+    { label: 'Місія', arcana: 7, energy: 7 },
+    { label: 'Характер', arcana: 11, energy: 6 },
+    { label: 'Доля', arcana: 19, energy: 8 },
+    { label: 'Карма роду', arcana: 16, energy: 3 },
+    { label: 'Партнерство', arcana: 6, energy: 5 },
+    { label: 'Гроші', arcana: 10, energy: 4 },
+    { label: 'Соц.реалізація', arcana: 21, energy: 9 },
+    { label: 'Дар душі', arcana: 22, energy: 7 },
+  ];
 
   function onDob(e) {
     // авто-крапки: ДД.ММ.РРРР
