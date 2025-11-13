@@ -17,7 +17,7 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
   const cx = size / 2;
   const cy = size / 2;
   const rOuter = size * 0.42;
-  const rInner = size * 0.22;
+  const rInner = size * 0.33;
 
   // 8 вершин восьмикутника
   const points = useMemo(() => {
@@ -48,12 +48,15 @@ export default function ArcanaMatrixWeb({ size = 520, values = [] }) {
 
   return (
     <div
-      style={{
-        width: '100%',
-        maxWidth: size,
-        margin: '40px auto 0',
-      }}
-    >
+  <div
+  style={{
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: '40px auto',
+  }}
+>
       <svg
         width={size}
         height={size}
