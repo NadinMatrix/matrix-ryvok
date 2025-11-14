@@ -1,372 +1,379 @@
-// components/ArcanaMatrixWeb.js
-import React, { useMemo } from 'react';
+import React from "react";
 
-const COLORS = {
-  bg: '#031827',
-  gold: '#E1CB92',
-  line: 'rgba(225,203,146,0.45)',
-  lineStrong: '#E1CB92',
-  circle: '#192B3A',
-  accentCircle: '#1F3144',
-  text: '#F5F5F5',
-  pink: '#FF6B81',
-};
+const degToRad = (deg: number) => (deg * Math.PI) / 180;
 
-function polar(cx, cy, r, angle) {
+const CENTER_X = 0;
+const CENTER_Y = 0;
+
+/**
+ * Базові радіуси
+ */
+const R_OUTER_OCTAGON = 70;   // вершини 1–8 (енергії по колу)
+const R_AGE_MARK = 76;        // точки / цифри років 0–75
+const R_LABEL = 58;           // підписи Небо / Земля / Рід ...
+const R_BIG_SQUARE = 32;      // зовнішній квадрат (родовий)
+const R_SMALL_SQUARE = 20;    // внутрішній квадрат (особистий)
+const R_ICONS = 34;           // радіус для іконок усередині секторів
+
+/**
+ * Допоміжна функція — координата за радіусом та кутом
+ */
+function polarToCartesian(radius: number, angleDeg: number) {
+  const rad = degToRad(angleDeg);
   return {
-    x: cx + r * Math.cos(angle),
-    y: cy + r * Math.sin(angle),
+    x: CENTER_X + radius * Math.cos(rad),
+    y: CENTER_Y + radius * Math.sin(rad),
   };
 }
 
 /**
- * Матриця долі RYVOK (метод Ладіні):
- * - 1 енергія строго ЗЛІВА
- * - далі 2-3-4-5-6-7-8 йдуть ЗА годинниковою стрілкою
- * - зовнішній квадрат — РОДОВИЙ
- * - внутрішній ромб — ОСОБИСТИЙ (личный)
- * - іконки $ та ❤️ в центрі відповідних сегментів (а не на лініях)
+ * Основний компонент матриці Ладіні
  */
-export default function ArcanaMatrixWeb({
-  size = 520,
-  ages = [0, 10, 20, 30, 40, 50, 60, 70],
-}) {
-  const cx = size / 2;
-  const cy = size / 2;
-
-  // геометрія
-  const rOuter = size * 0.38;        // вершини восьмикутника
-  const rRodSquare = size * 0.28;    // родовий квадрат (осьовий)
-  const rPersonalDiamond = size * 0.20; // особистий ромб (повернутий)
-  const rAge = rOuter + 26;          // кільце віків (цифри)
-  const rEnergy = (rOuter + rRodSquare) / 2; // кружечки енергій
-  const rIcons = (rRodSquare + rOuter) / 2;  // радіус для $ і ❤️
-
-  // 8 вершин восьмикутника:
-  // 1 — зліва, далі ЗА годинниковою: низ-ліво, низ, низ-право, право, верх-право, верх, верх-ліво
-  const octagon = useMemo(() => {
-    const pts = [];
-    const step = -Math.PI / 4; // мінус => рух за годинниковою
-    const base = Math.PI;      // 180° — строго зліва
-    for (let i = 0; i < 8; i++) {
-      const angle = base + i * step;
-      pts.push({
-        angle,
-        ...polar(cx, cy, rOuter, angle),
-      });
-    }
-    return pts;
-  }, [cx, cy, rOuter]);
-
-  const energyPoints = useMemo(
-    () =>
-      octagon.map(p => ({
-        angle: p.angle,
-        ...polar(cx, cy, rEnergy, p.angle),
-      })),
-    [octagon, cx, cy, rEnergy],
-  );
-
-  const agePoints = useMemo(
-    () =>
-      octagon.map(p => ({
-        ...polar(cx, cy, rAge, p.angle),
-      })),
-    [octagon, cx, cy, rAge],
-  );
-
-  // родовий квадрат (осьовий)
-  const rodSquare = [
-    { x: cx - rRodSquare, y: cy - rRodSquare },
-    { x: cx + rRodSquare, y: cy - rRodSquare },
-    { x: cx + rRodSquare, y: cy + rRodSquare },
-    { x: cx - rRodSquare, y: cy + rRodSquare },
+const LadiniMatrix: React.FC = () => {
+  /**
+   * 1. Восьмикутник з енергіями 1–8
+   *
+   * Орієнтація:
+   * - 1  — строго зліва (0 років)
+   * - 3  — внизу
+   * - 5  — справа
+   * - 7  — зверху
+   * - 2,4,6,8 — на діагоналях між ними
+   */
+  const energyNodes = [
+    { num: 1, angle: 180 },
+    { num: 2, angle: 135 },
+    { num: 3, angle: 90 },
+    { num: 4, angle: 45 },
+    { num: 5, angle: 0 },
+    { num: 6, angle: 315 },
+    { num: 7, angle: 270 },
+    { num: 8, angle: 225 },
   ];
 
-  // особистий ромб (квадрат під 45° всередині)
-  const personalDiamond = (() => {
-    const r = rPersonalDiamond;
-    const pts = [];
-    for (let i = 0; i < 4; i++) {
-      const angle = Math.PI / 4 + i * (Math.PI / 2); // 45°,135°...
-      pts.push(polar(cx, cy, r, angle));
-    }
-    return pts;
-  })();
+  /**
+   * 2. Вік по колу: 0, 5, 10, …, 75.
+   *
+   * Старт з 0 на тій самій осі, де 1 (зліва) і далі
+   * за годинниковою кожні 22.5° (16 позначок).
+   */
+  const ages = Array.from({ length: 16 }, (_, i) => i * 5);
+  const ageMarks = ages.map((age, i) => {
+    const angle = 180 + i * (360 / 16); // 0 років ліворуч → далі за годинниковою
+    return {
+      age,
+      angle,
+      ...polarToCartesian(R_AGE_MARK, angle),
+    };
+  });
 
-  // іконка $ — нижня права чверть
-  const moneyAngle = Math.PI / 4 + Math.PI / 2; // 225°?  => вниз-право
-  const moneyPos = polar(cx, cy, rIcons, moneyAngle);
+  /**
+   * 3. Квадрати всередині
+   *    - великий: родовий (по осях)
+   *    - малий: особистий (повернутий на 45°)
+   */
+  const bigSquarePoints = [0, 90, 180, 270].map((a) =>
+    polarToCartesian(R_BIG_SQUARE, a)
+  );
 
-  // іконка ❤️ — нижня центральна чверть
-  const heartAngle = Math.PI / 2; // 90° — вниз від центру
-  const heartPos = polar(cx, cy, rIcons, heartAngle);
+  const smallSquarePoints = [45, 135, 225, 315].map((a) =>
+    polarToCartesian(R_SMALL_SQUARE, a)
+  );
+
+  /**
+   * 4. Іконки:
+   *    ⚡ – у лівому нижньому секторі
+   *    $  – у правому верхньому секторі
+   *    ❤️ – у нижньому секторі між центром і "Земля"
+   *    Кути підібрані так, щоб вони були всередині сегментів, а не на лініях.
+   */
+  const lightningPos = polarToCartesian(R_ICONS, 210); // між 1–2–3
+  const moneyPos = polarToCartesian(R_ICONS, 330);     // між 3–4–5
+  const heartPos = polarToCartesian(R_ICONS, 90);      // між 2–3–4 (внизу)
+
+  /**
+   * 5. Підписи сторін світу / роду
+   */
+  const fatherLabelPos = polarToCartesian(R_LABEL, 180); // Рід батька
+  const motherLabelPos = polarToCartesian(R_LABEL, 0);   // Рід матері
+  const skyLabelPos = polarToCartesian(R_LABEL, 270);    // Небо
+  const earthLabelPos = polarToCartesian(R_LABEL, 90);   // Земля
+
+  /**
+   * 6. Восьмикутник (лінія життя) — ламаємо по точках енергій
+   */
+  const octagonPath = energyNodes
+    .map((node, index) => {
+      const { x, y } = polarToCartesian(R_OUTER_OCTAGON, node.angle);
+      return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+    })
+    .join(" ") + " Z";
 
   return (
     <div
       style={{
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 24,
+        width: "100%",
+        maxWidth: 600,
+        margin: "0 auto",
       }}
     >
       <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        style={{
-          borderRadius: 24,
-          background: COLORS.bg,
-        }}
+        viewBox="-110 -110 220 220"
+        style={{ width: "100%", height: "auto", display: "block" }}
       >
-        {/* м'яке затемнення по краях */}
+        {/* Фонова "карта" */}
         <defs>
-          <radialGradient id="matrixGlow" cx="50%" cy="40%" r="70%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.06)" />
-            <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+          <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#112232" stopOpacity="1" />
+            <stop offset="100%" stopColor="#0b1721" stopOpacity="1" />
           </radialGradient>
-
-          {/* простий вектор-heart */}
-          <symbol id="icon-heart" viewBox="0 0 24 24">
-            <path
-              d="M12 21s-5.5-3.2-8.3-6C1.5 12.8 1 10.6 2.1 8.9 3.1 7.3 5 6.7 6.7 7.3 7.6 7.6 8.4 8.3 9 9.1c.6-.8 1.4-1.5 2.3-1.8 1.7-.6 3.6 0 4.6 1.6 1.1 1.7.6 3.9-1.6 6.1C17.5 17.8 12 21 12 21z"
-              fill={COLORS.pink}
-            />
-          </symbol>
-
-          {/* простий вектор-$ */}
-          <symbol id="icon-money" viewBox="0 0 24 24">
-            <path
-              d="M12 3v18m-3-4.5c0 1.4 1.3 2.5 3 2.5s3-.8 3-2.3c0-1.7-1.4-2.2-3-2.7s-3-.9-3-2.7C9 7.8 10.3 7 12 7s3 .9 3 2.5"
-              fill="none"
-              stroke={COLORS.gold}
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </symbol>
         </defs>
 
         <rect
-          x={0}
-          y={0}
-          width={size}
-          height={size}
-          fill="url(#matrixGlow)"
-          rx={24}
+          x={-100}
+          y={-100}
+          width={200}
+          height={200}
+          rx={18}
+          ry={18}
+          fill="url(#bgGrad)"
+          stroke="#3b4b5d"
+          strokeWidth={0.6}
         />
 
-        {/* орбіти в центрі */}
-        {[0.18, 0.26, 0.34].map((k, idx) => (
+        {/* Додаткові концентричні кола (фон енергій років) */}
+        {[30, 45, 60, 75, 90].map((r, idx) => (
           <circle
             key={idx}
-            cx={cx}
-            cy={cy}
-            r={(size * k) / 2}
+            cx={CENTER_X}
+            cy={CENTER_Y}
+            r={r}
             fill="none"
-            stroke={COLORS.line}
-            strokeDasharray="4 7"
-            strokeWidth={0.9}
+            stroke="#1e2f40"
+            strokeWidth={0.4}
           />
         ))}
 
-        {/* восьмикутник (енергетичні вершини) */}
-        <polygon
-          points={octagon.map(p => `${p.x},${p.y}`).join(' ')}
-          fill="none"
-          stroke={COLORS.lineStrong}
-          strokeWidth={1.2}
+        {/* Вертикальна та горизонтальна осі */}
+        <line
+          x1={CENTER_X - 90}
+          y1={CENTER_Y}
+          x2={CENTER_X + 90}
+          y2={CENTER_Y}
+          stroke="#444f5e"
+          strokeWidth={0.4}
+          strokeDasharray="2 2"
+        />
+        <line
+          x1={CENTER_X}
+          y1={CENTER_Y - 90}
+          x2={CENTER_X}
+          y2={CENTER_Y + 90}
+          stroke="#444f5e"
+          strokeWidth={0.4}
+          strokeDasharray="2 2"
         />
 
-        {/* з'єднувальні лінії між вершинами (для чіткого восьмикутника) */}
-        {octagon.map((p, i) => {
-          const n = octagon[(i + 1) % 8];
-          return (
-            <line
-              key={`oct-line-${i}`}
-              x1={p.x}
-              y1={p.y}
-              x2={n.x}
-              y2={n.y}
-              stroke={COLORS.lineStrong}
-              strokeWidth={1}
-            />
-          );
-        })}
-
-        {/* родовий квадрат (осьовий) */}
+        {/* Великий квадрат (родовий) */}
         <polygon
-          points={rodSquare.map(p => `${p.x},${p.y}`).join(' ')}
+          points={bigSquarePoints.map((p) => `${p.x},${p.y}`).join(" ")}
           fill="none"
-          stroke={COLORS.line}
-          strokeWidth={1.2}
+          stroke="#f4d392"
+          strokeWidth={1}
         />
 
-        {/* личний (особистий) ромб */}
+        {/* Малий квадрат (особистий, ромб) */}
         <polygon
-          points={personalDiamond.map(p => `${p.x},${p.y}`).join(' ')}
+          points={smallSquarePoints.map((p) => `${p.x},${p.y}`).join(" ")}
           fill="none"
-          stroke={COLORS.gold}
+          stroke="#f4d392"
+          strokeWidth={1}
+          strokeDasharray="3 2"
+        />
+
+        {/* Лінії від центру до вершин великого квадрата (діагоналі) */}
+        {bigSquarePoints.map((p, idx) => (
+          <line
+            key={idx}
+            x1={CENTER_X}
+            y1={CENTER_Y}
+            x2={p.x}
+            y2={p.y}
+            stroke="#444f5e"
+            strokeWidth={0.4}
+            strokeDasharray="2 2"
+          />
+        ))}
+
+        {/* Восьмикутник (лінія життя) */}
+        <path
+          d={octagonPath}
+          fill="none"
+          stroke="#f4d392"
           strokeWidth={1.4}
         />
 
-        {/* вертикальна та горизонтальна осі */}
-        <line
-          x1={cx}
-          y1={cy - rRodSquare * 1.1}
-          x2={cx}
-          y2={cy + rRodSquare * 1.1}
-          stroke={COLORS.line}
-          strokeWidth={1}
-          strokeDasharray="4 6"
-        />
-        <line
-          x1={cx - rRodSquare * 1.1}
-          y1={cy}
-          x2={cx + rRodSquare * 1.1}
-          y2={cy}
-          stroke={COLORS.line}
-          strokeWidth={1}
-          strokeDasharray="4 6"
-        />
+        {/* Вікові мітки 0,5,10…75 */}
+        {ageMarks.map((m) => (
+          <g key={m.age}>
+            <circle cx={m.x} cy={m.y} r={1.2} fill="#d6ba7e" />
+            <text
+              x={m.x}
+              y={m.y}
+              dy={m.age === 0 ? -4 : 4}
+              fontSize={4}
+              fill="#d6ba7e"
+              textAnchor="middle"
+            >
+              {m.age}
+            </text>
+          </g>
+        ))}
 
-        {/* діагоналі роду (як на схемі a-b-c-d) */}
-        <line
-          x1={cx - rRodSquare}
-          y1={cy - rRodSquare}
-          x2={cx + rRodSquare}
-          y2={cy + rRodSquare}
-          stroke={COLORS.line}
-          strokeWidth={1}
-        />
-        <line
-          x1={cx + rRodSquare}
-          y1={cy - rRodSquare}
-          x2={cx - rRodSquare}
-          y2={cy + rRodSquare}
-          stroke={COLORS.line}
-          strokeWidth={1}
-        />
+        {/* Ноди енергій 1–8 */}
+        {energyNodes.map((node) => {
+          const pos = polarToCartesian(R_OUTER_OCTAGON, node.angle);
+          return (
+            <g key={node.num}>
+              {/* Лінія від центру до ноди (штрихова) */}
+              <line
+                x1={CENTER_X}
+                y1={CENTER_Y}
+                x2={pos.x}
+                y2={pos.y}
+                stroke="#4d5a6c"
+                strokeWidth={0.4}
+                strokeDasharray="2 2"
+              />
+              {/* Коло енергії */}
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r={6}
+                fill="#07131e"
+                stroke="#ff5b85"
+                strokeWidth={1.2}
+              />
+              <text
+                x={pos.x}
+                y={pos.y + 1.5}
+                textAnchor="middle"
+                fontSize={5}
+                fill="#ff5b85"
+                fontWeight={600}
+              >
+                {node.num}
+              </text>
+            </g>
+          );
+        })}
 
-        {/* ЯДРО */}
+        {/* Центр / Ядро */}
         <circle
-          cx={cx}
-          cy={cy}
-          r={7}
-          fill={COLORS.gold}
-          stroke={COLORS.bg}
-          strokeWidth={2}
+          cx={CENTER_X}
+          cy={CENTER_Y}
+          r={4}
+          fill="#f4d392"
+          stroke="#1b2532"
+          strokeWidth={0.8}
         />
         <text
-          x={cx}
-          y={cy + 22}
-          fill={COLORS.text}
-          fontSize={11}
+          x={CENTER_X}
+          y={CENTER_Y + 10}
+          fontSize={5}
+          fill="#f4d392"
           textAnchor="middle"
         >
           Ядро
         </text>
 
-        {/* іконка $ — фінансова вісь */}
-        <use
-          href="#icon-money"
-          x={moneyPos.x - 11}
-          y={moneyPos.y - 11}
-          width={22}
-          height={22}
-        />
-
-        {/* іконка ❤️ — емоційно-родова вісь */}
-        <use
-          href="#icon-heart"
-          x={heartPos.x - 10}
-          y={heartPos.y - 10}
-          width={20}
-          height={20}
-        />
-
-        {/* кружечки енергій */}
-        {energyPoints.map((p, i) => (
-          <g key={`en-${i}`}>
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={15}
-              fill={COLORS.bg}
-              stroke="#FF6B81"
-              strokeWidth={2}
-            />
-            <text
-              x={p.x}
-              y={p.y + 4}
-              fill={COLORS.text}
-              fontSize={14}
-              fontWeight="600"
-              textAnchor="middle"
-            >
-              {i + 1}
-            </text>
-          </g>
-        ))}
-
-        {/* роки — завжди ЗА годинниковою разом з енергіями */}
-        {agePoints.map((p, i) => (
-          <text
-            key={`age-${i}`}
-            x={p.x}
-            y={p.y}
-            fill={COLORS.lineStrong}
-            fontSize={11}
-            textAnchor="middle"
-            alignmentBaseline="middle"
-          >
-            {ages[i]}
-          </text>
-        ))}
-
-        {/* підписи сторін світу / роду */}
-        {/* НЕБО — над центром, ЗЕМЛЯ — знизу */}
+        {/* Підписи напрямків */}
         <text
-          x={cx}
-          y={cy - rRodSquare - 18}
-          fill={COLORS.text}
-          fontSize={11}
+          x={skyLabelPos.x}
+          y={skyLabelPos.y - 3}
+          fontSize={5}
+          fill="#f4d392"
           textAnchor="middle"
         >
           НЕБО
         </text>
+
         <text
-          x={cx}
-          y={cy + rRodSquare + 26}
-          fill={COLORS.text}
-          fontSize={11}
+          x={earthLabelPos.x}
+          y={earthLabelPos.y + 7}
+          fontSize={5}
+          fill="#f4d392"
           textAnchor="middle"
         >
           ЗЕМЛЯ
         </text>
 
-        {/* рід батька / матері — по горизонталі */}
         <text
-          x={cx - rRodSquare - 36}
-          y={cy + 4}
-          fill={COLORS.text}
-          fontSize={11}
-          textAnchor="middle"
+          x={fatherLabelPos.x - 4}
+          y={fatherLabelPos.y - 1}
+          fontSize={5}
+          fill="#f4d392"
+          textAnchor="end"
         >
           РІД БАТЬКА
         </text>
+
         <text
-          x={cx + rRodSquare + 40}
-          y={cy + 4}
-          fill={COLORS.text}
-          fontSize={11}
-          textAnchor="middle"
+          x={motherLabelPos.x + 4}
+          y={motherLabelPos.y - 1}
+          fontSize={5}
+          fill="#f4d392"
+          textAnchor="start"
         >
           РІД МАТЕРІ
         </text>
+
+        {/* ⚡ Іконка енергії (лівий нижній сектор) */}
+        <g
+          transform={`translate(${lightningPos.x},${lightningPos.y}) scale(0.9)`}
+        >
+          <polyline
+            points="-2,-7 2,-7 -1,-1 3,-1 -3,7 -1,1 -4,1"
+            fill="none"
+            stroke="#53e8ff"
+            strokeWidth={1.2}
+            strokeLinejoin="round"
+          />
+        </g>
+
+        {/* $ Іконка грошей (правий верхній сектор) */}
+        <g transform={`translate(${moneyPos.x},${moneyPos.y})`}>
+          <text
+            x={0}
+            y={2}
+            fontSize={10}
+            fill="#ffe08a"
+            textAnchor="middle"
+            fontWeight={700}
+          >
+            $
+          </text>
+        </g>
+
+        {/* ❤ Іконка кохання (нижній сектор) */}
+        <g transform={`translate(${heartPos.x},${heartPos.y}) scale(0.8)`}>
+          <path
+            d="
+              M 0 -3
+              C -2 -6 -7 -5 -7 -1
+              C -7 2 -4 5 0 7
+              C 4 5 7 2 7 -1
+              C 7 -5 2 -6 0 -3
+              Z
+            "
+            fill="#ff5b85"
+            stroke="#ff8cac"
+            strokeWidth={0.5}
+          />
+        </g>
       </svg>
     </div>
   );
-}
+};
+
+export default LadiniMatrix;
