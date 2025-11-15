@@ -186,8 +186,8 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         {/* ДУГА НЕБО (за годинниковою) */}
         <path
           d={`
-            M ${cx + arcW} ${cy + rOuter + 35}
-            A ${arcW} ${rOuter * 1.1} 0 0 1 ${cx - arcW} ${cy + rOuter + 35}
+            M ${cx + arcW} ${cy - rOuter + 35}
+            A ${arcW} ${rOuter * 1.1} 0 0 1 ${cx - arcW} ${cy - rOuter + 35}
           `}
           stroke={COLORS.lineStrong}
           strokeWidth={1.4}
@@ -383,7 +383,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
           ЗЕМЛЯ
         </text>
         <text
-          x={cx - rRodSquare - 40}
+          x={cx - rRodSquare - 20}
           y={cy + 4}
           fill={COLORS.text}
           fontSize={11}
