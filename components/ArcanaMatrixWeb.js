@@ -400,6 +400,51 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         >
           РІД МАТЕРІ
         </text>
+            {/* духовний центр над НЕБО */}
+<circle
+  cx={cx}
+  cy={cy - (rOuter + 60)}
+  r={20}
+  fill="none"
+  stroke={COLORS.lineStrong}
+  strokeWidth={1.6}
+/>
+
+{/* 3 енергії зліва на дузі */}
+{[-110, -130, -150].map((deg, i) => {
+  const rad = (Math.PI / 180) * deg;
+  const x = cx + (rOuter + 60) * Math.cos(rad);
+  const y = cy + (rOuter + 60) * Math.sin(rad);
+  return (
+    <circle
+      key={`left-${i}`}
+      cx={x}
+      cy={y}
+      r={16}
+      fill="none"
+      stroke={COLORS.lineStrong}
+      strokeWidth={1.4}
+    />
+  );
+})}
+
+{/* 3 енергії справа на дузі */}
+{[-70, -50, -30].map((deg, i) => {
+  const rad = (Math.PI / 180) * deg;
+  const x = cx + (rOuter + 60) * Math.cos(rad);
+  const y = cy + (rOuter + 60) * Math.sin(rad);
+  return (
+    <circle
+      key={`right-${i}`}
+      cx={x}
+      cy={y}
+      r={16}
+      fill="none"
+      stroke={COLORS.lineStrong}
+      strokeWidth={1.4}
+    />
+  );
+})}
       </svg>
     </div>
   );
