@@ -109,8 +109,8 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
   })();
 
   // позиції іконок (сегмент 45–55 років: нижній-правий сектор)
-  const moneyPos = polar(cx, cy, rIcons, -Math.PI / 6);     // $ трохи нижче-праворуч
-  const heartPos = polar(cx, cy, rIcons, -Math.PI / 2.5);   // ❤️ ще нижче-правіше
+  const moneyPos = polar(cx, cy, rIcons, Math.PI / 6);     // $ трохи нижче-праворуч
+  const heartPos = polar(cx, cy, rIcons, Math.PI / 2.5);   // ❤️ ще нижче-правіше
 
   // параметри дуги НЕБО
   const arcW = rOuter * 1.25;
