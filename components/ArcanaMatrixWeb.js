@@ -366,7 +366,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         {/* підписи сторін світу / роду */}
         <text
           x={cx}
-          y={cy - rRodSquare - 18}
+          y={cy - rRodSquare - 24}
           fill={COLORS.text}
           fontSize={11}
           textAnchor="middle"
@@ -375,7 +375,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         </text>
         <text
           x={cx}
-          y={cy + rRodSquare + 25}
+          y={cy + rRodSquare + 26}
           fill={COLORS.text}
           fontSize={11}
           textAnchor="middle"
@@ -403,7 +403,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
             {/* духовний центр над НЕБО */}
 <circle
   cx={cx}
-  cy={cy - (rOuter + 60)}
+  cy={cy + (rOuter + 60)}
   r={20}
   fill="none"
   stroke={COLORS.lineStrong}
@@ -411,7 +411,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
 />
 
 {/* 2 енергії зліва на дузі */}
-{[-110, -130, ].map((deg, i) => {
+{[ -130,-150 ].map((deg, i) => {
   const rad = (Math.PI / 180) * deg;
   const x = cx + (rOuter + 60) * Math.cos(rad);
   const y = cy + (rOuter + 60) * Math.sin(rad);
@@ -429,7 +429,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
 })}
 
 {/* 2 енергії справа на дузі */}
-{[-70, -50 ].map((deg, i) => {
+{[ -50 ,-30 ].map((deg, i) => {
   const rad = (Math.PI / 180) * deg;
   const x = cx + (rOuter + 60) * Math.cos(rad);
   const y = cy + (rOuter + 60) * Math.sin(rad);
