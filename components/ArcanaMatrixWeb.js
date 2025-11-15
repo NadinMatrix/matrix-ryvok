@@ -41,18 +41,18 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
   // 8 вершин восьмикутника:
   // 1 — строго зліва, далі за годинниковою
   const octagon = useMemo(() => {
-    const pts = [];
-    const base = Math.PI;        // 180° — ліво
-    const step = -Math.PI / 4;   // 45° за годинниковою
-    for (let i = 0; i < 8; i++) {
-      const angle = base + i * step;
-      pts.push({
-        angle,
-        ...polar(cx, cy, rOuter, angle),
-      });
-    }
-    return pts;
-  }, [cx, cy, rOuter]);
+  const pts = [];
+  const base = Math.PI;        // 180° — ліво, тут стоїть 1
+  const step = Math.PI / 4;    // +45° => ЗА годинниковою
+  for (let i = 0; i < 8; i++) {
+    const angle = base + i * step;
+    pts.push({
+      angle,
+      ...polar(cx, cy, rOuter, angle),
+    });
+  }
+  return pts;
+}, [cx, cy, rOuter]);
 
   // точки для енергій (по тому самому куту, тільки трохи ближче)
   const energyPoints = useMemo(
@@ -66,20 +66,20 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
 
   // поділки років: 0,5,10,…,75 (16 штук) — між енергіями
   const ageMarks = useMemo(() => {
-    const list = [];
-    const step = Math.PI / 8; // 22.5°
-    for (let i = 0; i < 16; i++) {
-      const age = i * 5;
-      // 0 років строго зліва, далі за годинниковою
-      const angle = Math.PI - i * step;
-      list.push({
-        age,
-        angle,
-        ...polar(cx, cy, rAge, angle),
-      });
-    }
-    return list;
-  }, [cx, cy, rAge]);
+  const list = [];
+  const step = Math.PI / 8; // 22.5°
+  for (let i = 0; i < 16; i++) {
+    const age = i * 5;
+    // 0 років строго зліва, далі ЗА годинниковою
+    const angle = Math.PI + i * step;   // ← тут міняємо «-» на «+»
+    list.push({
+      age,
+      angle,
+      ...polar(cx, cy, rAge, angle),
+    });
+  }
+  return list;
+}, [cx, cy, rAge]);
 
   // родовий квадрат (великий, осьовий)
   const rodSquare = [
