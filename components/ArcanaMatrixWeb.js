@@ -375,7 +375,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         </text>
         <text
           x={cx}
-          y={cy + rRodSquare + 26}
+          y={cy + rRodSquare + 46}
           fill={COLORS.text}
           fontSize={11}
           textAnchor="middle"
@@ -383,7 +383,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
           ЗЕМЛЯ
         </text>
         <text
-          x={cx - rRodSquare - 40}
+          x={cx - rRodSquare - 60}
           y={cy + 4}
           fill={COLORS.text}
           fontSize={11}
@@ -392,7 +392,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
           РІД БАТЬКА
         </text>
         <text
-          x={cx + rRodSquare + 44}
+          x={cx + rRodSquare + 64}
           y={cy + 4}
           fill={COLORS.text}
           fontSize={11}
@@ -403,7 +403,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
             {/* духовний центр над НЕБО */}
 <circle
   cx={cx}
-  cy={cy - (rOuter + 60)}
+  cy={cy - (rOuter + 80)}
   r={20}
   fill="none"
   stroke={COLORS.lineStrong}
