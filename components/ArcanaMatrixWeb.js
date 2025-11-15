@@ -186,7 +186,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         {/* ДУГА НЕБО (за годинниковою) */}
         <path
           d={`
-            M ${cx + arcW} ${cy - rOuter - 35}
+            M ${cx + arcW} ${cy - rOuter + 35}
             A ${arcW} ${rOuter * 1.1} 0 0 1 ${cx - arcW} ${cy - rOuter + 35}
           `}
           stroke={COLORS.lineStrong}
@@ -196,7 +196,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         {/* вертикаль від дуги до вершини НЕБО */}
         <line
           x1={cx}
-          y1={cy - rOuter + 35}
+          y1={cy - rOuter - 35}
           x2={cx}
           y2={cy - rOuter}
           stroke={COLORS.lineStrong}
@@ -429,7 +429,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
 })}
 
 {/* 2 енергії справа на дузі */}
-{[ -50, -30].map((deg, i) => {
+{[-70, -50 ].map((deg, i) => {
   const rad = (Math.PI / 180) * deg;
   const x = cx + (rOuter + 60) * Math.cos(rad);
   const y = cy + (rOuter + 60) * Math.sin(rad);
