@@ -375,7 +375,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         </text>
         <text
           x={cx}
-          y={cy + rRodSquare + 75}
+          y={cy + rRodSquare + 25}
           fill={COLORS.text}
           fontSize={11}
           textAnchor="middle"
