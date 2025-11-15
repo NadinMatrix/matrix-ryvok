@@ -25,36 +25,45 @@ function polar(cx, cy, r, angle) {
  * - енергії 1–8 йдуть ЗА годинниковою
  * - роки по колу 0–75 з кроком 5 років
  * - зовнішній квадрат — РОДОВИЙ, внутрішній ромб — ОСОБИСТИЙ
+ * - зверху дуга НЕБО з 3+3 колами і центральним великим подвійним колом
  */
 export default function ArcanaMatrixWeb({ size = 520 }) {
   const cx = size / 2;
   const cy = size / 2;
 
-  // геометрія
-  const rOuter = size * 0.30;          // радіус вершин восьмикутника
-  const rRodSquare = size * 0.23;      // великий родовий квадрат
-  const rPersonalDiamond = size * 0.17; // внутрішній особистий ромб
-  const rAge = rOuter + 22;            // кільце років
+  // геометрія основної матриці
+  const rOuter = size * 0.30;            // вершини восьмикутника
+  const rRodSquare = size * 0.23;        // великий родовий квадрат
+  const rPersonalDiamond = size * 0.17;  // внутрішній особистий ромб
+  const rAge = rOuter + 22;              // кільце років
   const rEnergy = (rOuter + rRodSquare) / 2; // кружечки енергій
   const rIcons = (rRodSquare + rOuter) / 2;  // радіус для іконок $ та ❤️
+
+  // геометрія верхньої дуги (НЕБО-рівень)
+  const topArcRadius = rOuter * 1.45;            // радіус дуги
+  const topArcCenterY = cy - rOuter * 1.05;      // центр дуги трохи над матрицею
+  const topArcCenterX = cx;
+  const topArcAngleSpan = Math.PI * 0.8;         // ~144°
+  const topArcStart = -Math.PI / 2 - topArcAngleSpan / 2; // лівий кінець дуги
+  const topArcEnd = -Math.PI / 2 + topArcAngleSpan / 2;   // правий кінець дуги
 
   // 8 вершин восьмикутника:
   // 1 — строго зліва, далі за годинниковою
   const octagon = useMemo(() => {
-  const pts = [];
-  const base = Math.PI;        // 180° — ліво, тут стоїть 1
-  const step = Math.PI / 4;    // +45° => ЗА годинниковою
-  for (let i = 0; i < 8; i++) {
-    const angle = base + i * step;
-    pts.push({
-      angle,
-      ...polar(cx, cy, rOuter, angle),
-    });
-  }
-  return pts;
-}, [cx, cy, rOuter]);
+    const pts = [];
+    const base = Math.PI;        // 180° — ліво
+    const step = -Math.PI / 4;   // 45° за годинниковою
+    for (let i = 0; i < 8; i++) {
+      const angle = base + i * step;
+      pts.push({
+        angle,
+        ...polar(cx, cy, rOuter, angle),
+      });
+    }
+    return pts;
+  }, [cx, cy, rOuter]);
 
-  // точки для енергій (по тому самому куту, тільки трохи ближче)
+  // точки для енергій
   const energyPoints = useMemo(
     () =>
       octagon.map(p => ({
@@ -64,22 +73,21 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
     [octagon, cx, cy, rEnergy],
   );
 
-  // поділки років: 0,5,10,…,75 (16 штук) — між енергіями
+  // поділки років: 0,5,10,…,75 (16 штук) — між енергіями, 0 строго зліва
   const ageMarks = useMemo(() => {
-  const list = [];
-  const step = Math.PI / 8; // 22.5°
-  for (let i = 0; i < 16; i++) {
-    const age = i * 5;
-    // 0 років строго зліва, далі ЗА годинниковою
-    const angle = Math.PI + i * step;   // ← тут міняємо «-» на «+»
-    list.push({
-      age,
-      angle,
-      ...polar(cx, cy, rAge, angle),
-    });
-  }
-  return list;
-}, [cx, cy, rAge]);
+    const list = [];
+    const step = Math.PI / 8; // 22.5°
+    for (let i = 0; i < 16; i++) {
+      const age = i * 5;
+      const angle = Math.PI - i * step; // за годинниковою
+      list.push({
+        age,
+        angle,
+        ...polar(cx, cy, rAge, angle),
+      });
+    }
+    return list;
+  }, [cx, cy, rAge]);
 
   // родовий квадрат (великий, осьовий)
   const rodSquare = [
@@ -101,8 +109,44 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
   })();
 
   // позиції іконок (сегмент 45–55 років: нижній-правий сектор)
-  const moneyPos = polar(cx, cy, rIcons, -Math.PI / 6);     // $ трохи нижче-праворуч
-  const heartPos = polar(cx, cy, rIcons, -Math.PI / 2.5);   // ❤️ ще нижче-правіше
+  const moneyPos = polar(cx, cy, rIcons, -Math.PI / 6);   // $ трохи нижче-праворуч
+  const heartPos = polar(cx, cy, rIcons, -Math.PI / 2.5); // ❤️ ще нижче-правіше
+
+  // точки для 7 кіл на верхній дузі: 3 ліворуч, 3 праворуч, 1 центральне (велике)
+  const topArcCircles = (() => {
+    const result = [];
+    const centerAngle = -Math.PI / 2;      // строго вверх
+    const step = Math.PI / 18;            // ~10° між сусідніми
+    const offsets = [-3, -2, -1, 0, 1, 2, 3];
+    offsets.forEach(idx => {
+      const angle = centerAngle + idx * step;
+      const pos = polar(topArcCenterX, topArcCenterY, topArcRadius, angle);
+      result.push({
+        angle,
+        x: pos.x,
+        y: pos.y,
+        isCenter: idx === 0,
+      });
+    });
+    return result;
+  })();
+
+  // координати кінців самої дуги
+  const topArcStartPos = polar(
+    topArcCenterX,
+    topArcCenterY,
+    topArcRadius,
+    topArcStart,
+  );
+  const topArcEndPos = polar(
+    topArcCenterX,
+    topArcCenterY,
+    topArcRadius,
+    topArcEnd,
+  );
+
+  // вершина восьмикутника "НЕБО" (зверху) — для вертикальної лінії
+  const topOctVertex = octagon.find(p => Math.abs(p.angle + Math.PI / 2) < 1e-3);
 
   return (
     <div
@@ -135,7 +179,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
           strokeWidth={1.2}
         />
 
-        {/* м'яке затемнення по краях */}
+        {/* м'яке затемнення по краях + SVG-символи */}
         <defs>
           <radialGradient id="matrixGlow" cx="50%" cy="45%" r="70%">
             <stop offset="0%" stopColor="rgba(255,255,255,0.04)" />
@@ -361,6 +405,84 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         >
           РІД МАТЕРІ
         </text>
+
+        {/* ===== ВЕРХНЯ ДУГА НЕБО ===== */}
+
+        {/* сама дуга */}
+        <path
+          d={`
+            M ${topArcStartPos.x} ${topArcStartPos.y}
+            A ${topArcRadius} ${topArcRadius} 0 0 1 ${topArcEndPos.x} ${topArcEndPos.y}
+          `}
+          fill="none"
+          stroke={COLORS.lineStrong}
+          strokeWidth={1.2}
+        />
+
+        {/* кола на дузі */}
+        {topArcCircles.map((c, idx) => {
+          if (c.isCenter) {
+            // центральний ДУХОВНИЙ — більший радіус + подвійний обвід
+            const rOuterBig = 20;
+            const rInnerBig = 14;
+            return (
+              <g key={`arc-circle-${idx}`}>
+                {/* вертикальна лінія вниз до вершини НЕБО */}
+                {topOctVertex && (
+                  <line
+                    x1={c.x}
+                    y1={c.y + rOuterBig}
+                    x2={topOctVertex.x}
+                    y2={topOctVertex.y}
+                    stroke={COLORS.lineStrong}
+                    strokeWidth={1.1}
+                  />
+                )}
+
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r={rOuterBig}
+                  fill={COLORS.bg}
+                  stroke={COLORS.gold}
+                  strokeWidth={2}
+                />
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r={rInnerBig}
+                  fill="none"
+                  stroke="#FF6B81"
+                  strokeWidth={1.8}
+                />
+              </g>
+            );
+          }
+
+          // бічні — менші, одинарні/подвійні
+          const rOuterSmall = 14;
+          const rInnerSmall = 9;
+          return (
+            <g key={`arc-circle-${idx}`}>
+              <circle
+                cx={c.x}
+                cy={c.y}
+                r={rOuterSmall}
+                fill={COLORS.bg}
+                stroke={COLORS.gold}
+                strokeWidth={1.6}
+              />
+              <circle
+                cx={c.x}
+                cy={c.y}
+                r={rInnerSmall}
+                fill="none"
+                stroke="#FF6B81"
+                strokeWidth={1.3}
+              />
+            </g>
+          );
+        })}
       </svg>
     </div>
   );
