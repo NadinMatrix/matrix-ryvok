@@ -186,8 +186,8 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         {/* ДУГА НЕБО (за годинниковою) */}
         <path
           d={`
-            M ${cx + arcW} ${cy - rOuter + 35}
-            A ${arcW} ${rOuter * 1.1} 0 0 1 ${cx - arcW} ${cy - rOuter + 35}
+            M ${cx + arcW} ${cy + rOuter + 35}
+            A ${arcW} ${rOuter * 1.1} 0 0 1 ${cx - arcW} ${cy + rOuter + 35}
           `}
           stroke={COLORS.lineStrong}
           strokeWidth={1.4}
@@ -375,7 +375,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
         </text>
         <text
           x={cx}
-          y={cy + rRodSquare + 26}
+          y={cy + rRodSquare + 76}
           fill={COLORS.text}
           fontSize={11}
           textAnchor="middle"
@@ -383,7 +383,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
           ЗЕМЛЯ
         </text>
         <text
-          x={cx - rRodSquare - 60}
+          x={cx - rRodSquare - 40}
           y={cy + 4}
           fill={COLORS.text}
           fontSize={11}
@@ -403,8 +403,8 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
             {/* духовний центр над НЕБО */}
 <circle
   cx={cx}
-  cy={cy + (rOuter + 60)}
-  r={20}
+  cy={cy - (rOuter + 60)}
+  r={22}
   fill="none"
   stroke={COLORS.lineStrong}
   strokeWidth={1.6}
