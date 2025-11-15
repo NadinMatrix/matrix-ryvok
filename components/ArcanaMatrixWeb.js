@@ -52,7 +52,7 @@ export default function ArcanaMatrixWeb({ size = 520 }) {
   const octagon = useMemo(() => {
     const pts = [];
     const base = Math.PI;        // 180° — ліво
-    const step = -Math.PI / 4;   // +45° за годинниковою
+    const step = -Math.PI / 4;   // 45° за годинниковою
     for (let i = 0; i < 8; i++) {
       const angle = base + i * step;
       pts.push({
